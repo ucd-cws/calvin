@@ -1,5 +1,7 @@
-from __future__ import division 
-from pyomo.environ import *
+from __future__ import division # This line is used to ensure that int or long division arguments are converted to floating point values before division is performed 
+from pyomo.environ import * # This command makes the symbols used by Pyomo known to Python
+import itertools
+# Command to run the model: pyomo --solver=glpk --solver-suffix=dual ###.py ###.dat
 
 model = AbstractModel()
 
@@ -15,9 +17,9 @@ model.source = Param(within=model.N)
 # Sink node
 model.sink = Param(within=model.N)
 # Initial storage node
-model.initial = Param(within=model.N)
+##model.initial = Param(within=model.N)
 # Ending storage node
-model.ending = Param(within=model.N)
+##model.ending = Param(within=model.N)
 # Flow capacity limits
 model.u = Param(model.A)
 # Flow lower bound
@@ -45,6 +47,7 @@ def limit_rule_lower(model, i, j, k):
     return model.X[i,j,k] >= model.l[i,j,k]
 model.limit_lower = Constraint(model.A, rule=limit_rule_lower)
 
+
 # To speed up creating the mass balance constraints, first
 # create dictionaries of arcs_in and arcs_out of every node
 # These are NOT Pyomo data, and Pyomo does not use "model._" at all
@@ -65,9 +68,13 @@ model._ = Set(model.A, initialize=arc_list_hack)
 
 # Enforce flow through each node (mass balance)
 def flow_rule(model, node):
-  if node in [value(model.source), value(model.sink), value(model.initial), value(model.ending)]:
+  if node in [value(model.source), value(model.sink)]:
       return Constraint.Skip
   outflow  = sum(model.X[i,j,k]/model.a[i,j,k] for i,j,k in arcs_out[node])
   inflow = sum(model.X[i,j,k] for i,j,k in arcs_in[node])
   return inflow == outflow
 model.flow = Constraint(model.N, rule=flow_rule)
+
+
+
+
