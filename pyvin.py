@@ -16,10 +16,6 @@ model.A = Set(within=model.N*model.N*model.k)
 model.source = Param(within=model.N)
 # Sink node
 model.sink = Param(within=model.N)
-# Initial storage node
-##model.initial = Param(within=model.N)
-# Ending storage node
-##model.ending = Param(within=model.N)
 # Flow capacity limits
 model.u = Param(model.A)
 # Flow lower bound
