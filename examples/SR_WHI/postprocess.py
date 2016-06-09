@@ -59,14 +59,17 @@ flows = results['Solution'][1]['Variable']
 constraints = results['Solution'][1]['Constraint']
 
 for link in network:
-  
   s = ','.join(link[0:3])
   if '.' in link[0] and '.' in link[1]:
     n1,t1 = link[0].split('.')
     n2,t2 = link[1].split('.')
     is_storage_node = (n1 == n2)
+  elif '.' in link[0] and link[1] == 'FINAL': # End-of-period storage for reservoirs
+    n1,t1 = link[0].split('.')
+    is_storage_node = True
   else:
-    continue # do not include boundary conditions right now
+    continue 
+
   # fix zeros in pyomo output  
   v = dict_get(flows, 'X[%s]' % s, 'Value', default = 0.0)
   d1 = dict_get(constraints, 'limit_upper[%s]' % s, 'Dual', default = None)
@@ -93,7 +96,7 @@ for node in network_nodes:
     dict_insert(D_node, n3, t3, d3, 'max')
 
 # write the output files
-things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), (D_lo, 'dual_lower'), (D_node, 'dual_node')] # with storage
+things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), (D_lo, 'dual_lower'), (D_node, 'dual_node')]
 
 for data,name in things_to_save:
   save_dict_as_csv(data, name + '.csv')
