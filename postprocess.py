@@ -3,7 +3,7 @@ import csv
 
 def save_dict_as_csv(data, filename):
   node_keys = sorted(data.keys())
-  time_keys = sorted(data[node_keys[0]].keys(), key=int) # add key=int for integer timesteps
+  time_keys = sorted(data[node_keys[0]].keys()) # add key=int for integer timesteps
 
   header = ['time'] + node_keys
   writer = csv.writer(open(filename, 'wb'))
@@ -39,12 +39,17 @@ def dict_insert(D, k1, k2, v, collision_rule):
 # start with four empty dicts -- this is
 # what we want to output (in separate files):
 # flows (F), storages (S), and duals (D)
-F,S,D_up,D_lo = {}, {}, {}, {}
+F,S,D_up,D_lo,D_node = {}, {}, {}, {}, {}
 
 # load network links
 with open('links.csv', 'rU') as f:
   reader = csv.reader(f)
   network = list(reader)
+
+# load network nodes
+with open('nodes.csv', 'rU') as f:
+  reader = csv.reader(f)
+  network_nodes = list(reader)
 
 # results from Pyomo
 with open('results.json', 'r') as f:
@@ -55,13 +60,15 @@ constraints = results['Solution'][1]['Constraint']
 
 for link in network:
   s = ','.join(link[0:3])
-
   if '.' in link[0] and '.' in link[1]:
     n1,t1 = link[0].split('.')
     n2,t2 = link[1].split('.')
     is_storage_node = (n1 == n2)
+  elif '.' in link[0] and link[1] == 'FINAL': # End-of-period storage for reservoirs
+    n1,t1 = link[0].split('.')
+    is_storage_node = True
   else:
-    continue # do not include boundary conditions right now
+    continue 
 
   # fix zeros in pyomo output  
   v = dict_get(flows, 'X[%s]' % s, 'Value', default = 0.0)
@@ -80,10 +87,18 @@ for link in network:
   dict_insert(D_up, key, t1, d1, 'max')
   dict_insert(D_lo, key, t1, d2, 'max')
 
+# store dual values nodes in a dictionary
+for node in network_nodes:
+  if '.' in node[0]:
+    k = 'flow['+str(node[0])+']'
+    n3,t3 = node[0].split('.')
+    d3 = dict_get(constraints, k, 'Dual', default= None)
+    dict_insert(D_node, n3, t3, d3, 'max')
+
 # write the output files
-things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), (D_lo, 'dual_lower')]
+things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), (D_lo, 'dual_lower'), (D_node, 'dual_node')]
 
 for data,name in things_to_save:
   save_dict_as_csv(data, name + '.csv')
 
-   
+print('time-series successfully stored in csv files')
