@@ -26,7 +26,7 @@ model.a = Param(model.A)
 model.c = Param(model.A)
 
 # The flow over each arc
-model.X = Var(model.A, within=NonNegativeReals)
+model.X = Var(model.A, within=Reals)
 
 # Minimize total cost
 def total_rule(model):
