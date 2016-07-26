@@ -17,7 +17,7 @@ https://docs.google.com/document/d/1lGeftVEqG29oMpNMte_GTC2krhkZutpp-2GdsonTzgA/
 
 To create a model run (12 months) from HOBBES network: 
 ```
-cnf matrix --format csv --start 2002-10 --stop 2003-10 --ts . --to networklinks --max-ub 1000000 --outnodes networknodes
+cnf matrix --format csv --start 2002-10 --stop 2003-10 --ts . --fs :tab: --to networklinks --max-ub 1000000 --outnodes networknodes
 ```
 
 To add debug flows, use flag: 
@@ -25,9 +25,16 @@ To add debug flows, use flag:
 --debug All
 ```
 
+To create a run with defined nodes only:
+
+Example: SR_SHA and D5 between Oct 1983 to Sep 1984 in debug mode
+```
+ cnf matrix --format csv --start 1983-10 --stop 1984-10 --ts . --fs :tab: --to networklinks --max-ub 10000000 --outnodes networknodes nodes SR_SHA D5 --debug SR_SHA D5
+```
+
 To run the optimization: 
 ```
 pyomo solve --solver=glpk --report-timing --solver-suffix=dual pyvin.py data.dat --json
 ```
 
-Then run `postprocess.py` to format the results as time series. 
+Then run `postprocess.py` to format the results as time-series. 
