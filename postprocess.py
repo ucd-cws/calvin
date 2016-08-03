@@ -80,7 +80,7 @@ for link in network:
     key = n1
     dict_insert(S, key, t1, v, 'sum')
   else:
-    key = n1 + '_' + n2
+    key = n1 + '-' + n2
     dict_insert(F, key, t1, v, 'sum')
 
   # open question: what to do about duals on pumping links? Is this handled?
