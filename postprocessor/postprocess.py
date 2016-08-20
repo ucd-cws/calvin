@@ -6,7 +6,7 @@ def save_dict_as_csv(data, filename):
   time_keys = sorted(data[node_keys[0]].keys()) # add key=int for integer timesteps
 
   header = ['time'] + node_keys
-  writer = csv.writer(open(filename, 'wb'))
+  writer = csv.writer(open(filename, 'w'))
   writer.writerow(header)
   
   for t in time_keys:
@@ -33,7 +33,7 @@ def dict_insert(D, k1, k2, v, collision_rule):
     if collision_rule == 'sum':
       D[k1][k2] += v
     elif collision_rule == 'max':
-      if v is not None and v > D[k1][k2]:
+      if v is not None and (D[k1][k2] is None or v > D[k1][k2]):
         D[k1][k2] = v
 
 # start with four empty dicts -- this is
