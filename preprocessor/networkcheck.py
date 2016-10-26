@@ -1,41 +1,51 @@
 import csv
 import numpy as np
 
+fp = './'
+
 # load network links
-with open('networklinks.csv', 'rU') as l:
+with open(fp + 'links.csv', 'rU') as l:
   reader = csv.reader(l)
   links = list(reader)
 
 # load network nodes
-with open('networknodes', 'rU') as n:
+with open(fp + 'nodes.csv', 'rU') as n:
   reader = csv.reader(n)
   nodes = list(reader)
+
+num_in = {n[0]: 0 for n in nodes} 
+num_out = {n[0]: 0 for n in nodes}
+lb_in = {n[0]: 0 for n in nodes} 
+lb_out = {n[0]: 0 for n in nodes}
+ub_in = {n[0]: 0 for n in nodes} 
+ub_out = {n[0]: 0 for n in nodes}
 
 nrows_l = len(links) # # of rows in links
 nrows_n = len(nodes) # # of rows in nodes
 
-incoming = np.zeros(nrows_n) # number of incoming links
-outgoing = np.zeros(nrows_n) # number of outgoing links
+# loop over links
+for l in links[1:]:
+  num_in[l[1]] += 1
+  lb_in[l[1]] += float(l[5])
+  ub_in[l[1]] += float(l[6])
+  num_out[l[0]] += 1
+  lb_out[l[0]] += float(l[5])
+  ub_out[l[0]] += float(l[6])
 
-# check the numbers of incoming and outgoing links for each node
-for i in range(0,nrows_n):
-	count1, count2 = 0, 0
-	for j in range(1,nrows_l): # start from the second row. First row is a header
-		if nodes[i][0] == links[j][1]: # check for incoming links
-			count1 += 1
-		if nodes[i][0] == links[j][0]: # check for outgoing links
-			count2 += 1
-	incoming[i] = count1
-	outgoing[i] = count2
+for n in nodes:
+  if num_in[n[0]] == 0:
+    print('no incoming link for ' + n[0])
+  if num_out[n[0]] == 0:
+    print('no outgoing link for ' + n[0])
 
-	if count1 == 0:
-		print('no incoming link for ' + str(nodes[i]))
-	if count2 == 0:
-		print('no outgoing link for ' + str(nodes[i]))
+  if ub_in[n[0]] < lb_out[n[0]]:
+    print('ub_in < lb_out for %s (%d < %d)' % (n[0], ub_in[n[0]], lb_out[n[0]]))
+  if lb_in[n[0]] > ub_out[n[0]]:
+    print('lb_in > ub_out for %s (%d > %d)' % (n[0], lb_in[n[0]], ub_out[n[0]]))
 
-# Save results to a .csv file
-nodes = [node[0] for node in nodes]
-with open('networkcheck.csv', 'w') as csvfile:
-    writer = csv.writer(csvfile, delimiter=',')
-    writer.writerow(["node", "# incoming", "# outgoing"]) # header
-    writer.writerows(zip(nodes, list(incoming), list(outgoing))) # results
+# # Save results to a .csv file
+# nodes = [node[0] for node in nodes]
+# with open('networkcheck.csv', 'w') as csvfile:
+#     writer = csv.writer(csvfile, delimiter=',')
+#     writer.writerow(["node", "# incoming", "# outgoing"]) # header
+#     writer.writerows(zip(nodes, list(incoming), list(outgoing))) # results
