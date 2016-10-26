@@ -25,12 +25,19 @@ nrows_n = len(nodes) # # of rows in nodes
 
 # loop over links
 for l in links[1:]:
+  lb = float(l[5])
+  ub = float(l[6])
   num_in[l[1]] += 1
-  lb_in[l[1]] += float(l[5])
-  ub_in[l[1]] += float(l[6])
+  lb_in[l[1]] += lb
+  ub_in[l[1]] += ub
   num_out[l[0]] += 1
-  lb_out[l[0]] += float(l[5])
-  ub_out[l[0]] += float(l[6])
+  lb_out[l[0]] += lb
+  ub_out[l[0]] += ub
+
+  if lb > ub:
+    print('lb > ub for link %s' % (l[0]+'-'+l[1]))
+
+
 
 for n in nodes:
   if num_in[n[0]] == 0:
