@@ -9,26 +9,6 @@ def save_dict_as_csv(data, filename):
   writer = csv.writer(open(filename, 'w'))
   writer.writerow(header)
 
-  # with open('REGIONS.csv','r') as f:
-  #   reader=csv.reader(f)
-  #   REGIONS = list(reader)
-
-
-  # region=['region']
-
-  # for i in range(1,len(header)):
-  #   check=0;
-  #   for j in range(len(REGIONS)):
-  #     if header[i] == REGIONS[j][0]:
-  #       region.append(REGIONS[j][1])
-  #       check=1;
-  #   if check == 0:
-  #     region.append('Unknown')
-
-
-  # writer.writerow(region)
-
-
   for t in time_keys:
     row = [t]
     for k in node_keys:
@@ -62,12 +42,11 @@ def dict_insert(D, k1, k2, v, collision_rule = None):
     else:
       raise ValueError('Keys [%s][%s] already exist in dictionary' % (k1,k2))
 
-# start with four empty dicts -- this is
+# start with empty dicts -- this is
 # what we want to output (in separate files):
-# flows (F), storages (S), and duals (D)
-F,S,E,D_up,D_lo,D_node = {}, {}, {}, {}, {}, {}
-ShortAgVol,ShortAgCost,ShortUrbVol,ShortUrbCost={},{},{},{}
-
+# flows (F), storages (S), duals (D), evap (E), shortage vol (SV) and cost (SC)
+F,S,E,SV,SC = {}, {}, {}, {}, {}
+D_up,D_lo,D_node = {}, {}, {}
 
 # load network links
 with open('links.csv', 'rU') as f:
@@ -79,24 +58,10 @@ with open('nodes.csv', 'rU') as f:
   reader = csv.reader(f)
   network_nodes = list(reader)
 
-#load urban and ag nodes
-# with open('agnodes_region_102016.csv', 'r') as f:
-#   reader = csv.reader(f)
-#   agnodes = list(reader)
-#   # agg=list()
-#   # for i in range(len(agnodes)):
-#   #   agg.append('\n'.join(agnodes[i]))
-#   # agnodes=agg
-
-
-# with open('urbannodes_region_102016.csv', 'r') as f:
-#   reader = csv.reader(f)
-#   urbannodes = list(reader)
-#   # urbb=list()
-  # for i in range(len(urbannodes)):
-  #   urbb.append('\n'.join(urbannodes[i]))
-  # urbannodes=urbb
-
+# load list of demand nodes to find shortages/costs for
+with open('demand_nodes.csv', 'r') as f:
+  reader = csv.reader(f)
+  demand_nodes = [row[0] for row in reader]
 
 # results from Pyomo
 with open('results.json', 'r') as f:
@@ -135,24 +100,17 @@ for link in network:
   else:
     key = n1 + '-' + n2
     dict_insert(F, key, t1, v, 'sum')
-    # #Check for urban or ag demands
-    # TOL=1e-6;
-    # for aglink in agnodes:
-    #   if key in aglink[0]:
-    #     if (float(link[6])-float(v))>TOL:
-    #       dict_insert(ShortAgVol, key, t1, float(link[6])-float(v), 'sum')
-    #       dict_insert(ShortAgCost, key, t1, float(link[3])*(float(link[6])-float(v)), 'sum')
-    #     else:
-    #       dict_insert(ShortAgVol, key, t1, 0, 'sum')
-    #       dict_insert(ShortAgCost, key, t1, 0, 'sum')
-    # for urblink in urbannodes:
-    #   if key in urblink[0]:
-    #     if (float(link[6])-float(v))>TOL:
-    #       dict_insert(ShortUrbVol, key, t1, float(link[6])-float(v), 'sum')
-    #       dict_insert(ShortUrbCost, key, t1, float(link[3])*(float(link[6])-float(v)), 'sum')
-    #     else:
-    #       dict_insert(ShortUrbVol, key, t1, 0, 'sum')
-    #       dict_insert(ShortUrbCost, key, t1, 0, 'sum')
+
+    # Check for urban or ag demands
+    if key in demand_nodes:
+      ub = float(link[6])
+      unit_cost = float(link[3])
+      if (ub - v) > 1e-6: # if there is a shortage
+        dict_insert(SV, key, t1, ub-v, 'sum')
+        dict_insert(SC, key, t1, -1*unit_cost*(ub-v), 'sum')
+      else:
+        dict_insert(SV, key, t1, 0.0, 'sum')
+        dict_insert(SC, key, t1, 0.0, 'sum')
 
   # open question: what to do about duals on pumping links? Is this handled?
   dict_insert(D_up, key, t1, d1, 'last')
@@ -169,9 +127,8 @@ for node in network_nodes:
 # write the output files
 things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
                   (D_lo, 'dual_lower'), (D_node, 'dual_node'),
-                  (E,'evaporation')]#,(ShortAgVol,'shortagvol'),
-                  # (ShortAgCost,'shortagcost'), (ShortUrbCost,'shorturbcost'),
-                  # (ShortUrbVol,'shorturbvol')]
+                  (E,'evaporation'), (SV,'shortage_volume'),
+                  (SC,'shortage_cost')]
 
 for data,name in things_to_save:
   save_dict_as_csv(data, name + '.csv')
