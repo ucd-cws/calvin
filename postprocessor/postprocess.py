@@ -44,7 +44,7 @@ def dict_get(D, k1, k2, default = 0.0):
   else:
     return default
 
-def dict_insert(D, k1, k2, v, collision_rule):
+def dict_insert(D, k1, k2, v, collision_rule = None):
   if k1 not in D:
     D[k1] = {k2: v}
   elif k2 not in D[k1]:
@@ -52,9 +52,15 @@ def dict_insert(D, k1, k2, v, collision_rule):
   else:
     if collision_rule == 'sum':
       D[k1][k2] += v
-    elif collision_rule == 'max':
-      if v is not None and (D[k1][k2] is None or v > D[k1][k2]):
-        D[k1][k2] = v
+    # elif collision_rule == 'max':
+    #   if v is not None and (D[k1][k2] is None or v > D[k1][k2]):
+    #     D[k1][k2] = v
+    elif collision_rule == 'first':
+      pass # do nothing, we already have the first value
+    elif collision_rule == 'last':
+      D[k1][k2] = v # replace
+    else:
+      raise ValueError('Keys [%s][%s] already exist in dictionary' % (k1,k2))
 
 # start with four empty dicts -- this is
 # what we want to output (in separate files):
@@ -149,8 +155,8 @@ for link in network:
     #       dict_insert(ShortUrbCost, key, t1, 0, 'sum')
 
   # open question: what to do about duals on pumping links? Is this handled?
-  dict_insert(D_up, key, t1, d1, 'max')
-  dict_insert(D_lo, key, t1, d2, 'max')
+  dict_insert(D_up, key, t1, d1, 'last')
+  dict_insert(D_lo, key, t1, d2, 'first')
 
 
 # get dual values for nodes (mass balance)
@@ -158,7 +164,7 @@ for node in network_nodes:
   if '.' in node[0]:
     n3,t3 = node[0].split('.')
     d3 = dict_get(constraints,'flow[%s]' % node[0], 'Dual')
-    dict_insert(D_node, n3, t3, d3, 'max')
+    dict_insert(D_node, n3, t3, d3)
 
 # write the output files
 things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
