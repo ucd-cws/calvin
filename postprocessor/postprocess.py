@@ -64,12 +64,12 @@ ShortAgVol,ShortAgCost,ShortUrbVol,ShortUrbCost={},{},{},{}
 
 
 # load network links
-with open('networklinks.csv', 'rU') as f:
+with open('links.csv', 'rU') as f:
   reader = csv.reader(f)
   network = list(reader)
 
 # load network nodes
-with open('networknodes', 'rU') as f:
+with open('nodes.csv', 'rU') as f:
   reader = csv.reader(f)
   network_nodes = list(reader)
 
