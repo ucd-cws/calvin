@@ -5,28 +5,28 @@ def save_dict_as_csv(data, filename):
   node_keys = sorted(data.keys())
   time_keys = sorted(data[node_keys[0]].keys()) # add key=int for integer timesteps
 
-  header = ['time'] + node_keys
+  header = ['date'] + node_keys
   writer = csv.writer(open(filename, 'w'))
   writer.writerow(header)
 
-  with open('REGIONS.csv','r') as f:
-    reader=csv.reader(f)
-    REGIONS = list(reader)
+  # with open('REGIONS.csv','r') as f:
+  #   reader=csv.reader(f)
+  #   REGIONS = list(reader)
 
 
-  region=['region']
+  # region=['region']
 
-  for i in range(1,len(header)):
-    check=0;
-    for j in range(len(REGIONS)):
-      if header[i] == REGIONS[j][0]:
-        region.append(REGIONS[j][1])
-        check=1;
-    if check == 0:
-      region.append('Unknown')
+  # for i in range(1,len(header)):
+  #   check=0;
+  #   for j in range(len(REGIONS)):
+  #     if header[i] == REGIONS[j][0]:
+  #       region.append(REGIONS[j][1])
+  #       check=1;
+  #   if check == 0:
+  #     region.append('Unknown')
 
 
-  writer.writerow(region)
+  # writer.writerow(region)
 
 
   for t in time_keys:
@@ -38,7 +38,7 @@ def save_dict_as_csv(data, filename):
         row.append(0.0)
     writer.writerow(row)
 
-def dict_get(D, k1, k2, default=0.0):
+def dict_get(D, k1, k2, default = 0.0):
   if k1 in D and k2 in D[k1]:
     return D[k1][k2]
   else:
@@ -74,19 +74,19 @@ with open('nodes.csv', 'rU') as f:
   network_nodes = list(reader)
 
 #load urban and ag nodes
-with open('agnodes_region_102016.csv', 'r') as f:
-  reader = csv.reader(f)
-  agnodes = list(reader)
-  # agg=list()
-  # for i in range(len(agnodes)):
-  #   agg.append('\n'.join(agnodes[i]))
-  # agnodes=agg
+# with open('agnodes_region_102016.csv', 'r') as f:
+#   reader = csv.reader(f)
+#   agnodes = list(reader)
+#   # agg=list()
+#   # for i in range(len(agnodes)):
+#   #   agg.append('\n'.join(agnodes[i]))
+#   # agnodes=agg
 
 
-with open('urbannodes_region_102016.csv', 'r') as f:
-  reader = csv.reader(f)
-  urbannodes = list(reader)
-  # urbb=list()
+# with open('urbannodes_region_102016.csv', 'r') as f:
+#   reader = csv.reader(f)
+#   urbannodes = list(reader)
+#   # urbb=list()
   # for i in range(len(urbannodes)):
   #   urbb.append('\n'.join(urbannodes[i]))
   # urbannodes=urbb
@@ -105,7 +105,7 @@ for link in network:
     n1,t1 = link[0].split('.')
     n2,t2 = link[1].split('.')
     is_storage_node = (n1 == n2)
-    if is_storage_node == 1:
+    if is_storage_node:
       amplitude = float(link[4])
   elif '.' in link[0] and link[1] == 'FINAL': # End-of-period storage for reservoirs
     n1,t1 = link[0].split('.')
@@ -114,58 +114,58 @@ for link in network:
   else:
     continue
 
-
-  # fix zeros in pyomo output  
-  v = dict_get(flows, 'X[%s]' % s, 'Value', default = 0.0)
-  d1 = dict_get(constraints, 'limit_upper[%s]' % s, 'Dual', default = None)
-  d2 = dict_get(constraints, 'limit_lower[%s]' % s, 'Dual', default = None)
-
+  # get values from JSON results. If they don't exist, default is 0.0.
+  # (sometimes pyomo does not include zero values in the output)
+  v = dict_get(flows, 'X[%s]' % s, 'Value')
+  d1 = dict_get(constraints, 'limit_upper[%s]' % s, 'Dual')
+  d2 = dict_get(constraints, 'limit_lower[%s]' % s, 'Dual')
 
   # sum over piecewise components
   if is_storage_node:
     key = n1
-    EVAP=(1-amplitude)*float(v)/amplitude
+    evap = (1 - amplitude)*float(v)/amplitude
     dict_insert(S, key, t1, v, 'sum')
-    dict_insert(E, key, t1, EVAP, 'sum')
+    dict_insert(E, key, t1, evap, 'sum')
   else:
     key = n1 + '-' + n2
     dict_insert(F, key, t1, v, 'sum')
     # #Check for urban or ag demands
-    TOL=1e-6;
-    for aglink in agnodes:
-      if key in aglink[0]:
-        if (float(link[6])-float(v))>TOL:
-          dict_insert(ShortAgVol, key, t1, float(link[6])-float(v), 'sum')
-          dict_insert(ShortAgCost, key, t1, float(link[3])*(float(link[6])-float(v)), 'sum')
-        else:
-          dict_insert(ShortAgVol, key, t1, 0, 'sum')
-          dict_insert(ShortAgCost, key, t1, 0, 'sum')
-    for urblink in urbannodes:
-      if key in urblink[0]:
-        if (float(link[6])-float(v))>TOL:
-          dict_insert(ShortUrbVol, key, t1, float(link[6])-float(v), 'sum')
-          dict_insert(ShortUrbCost, key, t1, float(link[3])*(float(link[6])-float(v)), 'sum')
-        else:
-          dict_insert(ShortUrbVol, key, t1, 0, 'sum')
-          dict_insert(ShortUrbCost, key, t1, 0, 'sum')
+    # TOL=1e-6;
+    # for aglink in agnodes:
+    #   if key in aglink[0]:
+    #     if (float(link[6])-float(v))>TOL:
+    #       dict_insert(ShortAgVol, key, t1, float(link[6])-float(v), 'sum')
+    #       dict_insert(ShortAgCost, key, t1, float(link[3])*(float(link[6])-float(v)), 'sum')
+    #     else:
+    #       dict_insert(ShortAgVol, key, t1, 0, 'sum')
+    #       dict_insert(ShortAgCost, key, t1, 0, 'sum')
+    # for urblink in urbannodes:
+    #   if key in urblink[0]:
+    #     if (float(link[6])-float(v))>TOL:
+    #       dict_insert(ShortUrbVol, key, t1, float(link[6])-float(v), 'sum')
+    #       dict_insert(ShortUrbCost, key, t1, float(link[3])*(float(link[6])-float(v)), 'sum')
+    #     else:
+    #       dict_insert(ShortUrbVol, key, t1, 0, 'sum')
+    #       dict_insert(ShortUrbCost, key, t1, 0, 'sum')
 
   # open question: what to do about duals on pumping links? Is this handled?
   dict_insert(D_up, key, t1, d1, 'max')
   dict_insert(D_lo, key, t1, d2, 'max')
 
 
-# store dual values nodes in a dictionary
+# get dual values for nodes (mass balance)
 for node in network_nodes:
   if '.' in node[0]:
-    k = 'flow['+str(node[0])+']'
     n3,t3 = node[0].split('.')
-    d3 = dict_get(constraints, k, 'Dual', default= None)
+    d3 = dict_get(constraints,'flow[%s]' % node[0], 'Dual')
     dict_insert(D_node, n3, t3, d3, 'max')
 
 # write the output files
-things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), (D_lo, 'dual_lower'), (D_node, 'dual_node'),(E,'evaporation'),(ShortAgVol,'shortagvol'),(ShortAgCost,'shortagcost'),(ShortUrbCost,'shorturbcost'),(ShortUrbVol,'shorturbvol')]
+things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
+                  (D_lo, 'dual_lower'), (D_node, 'dual_node'),
+                  (E,'evaporation')]#,(ShortAgVol,'shortagvol'),
+                  # (ShortAgCost,'shortagcost'), (ShortUrbCost,'shorturbcost'),
+                  # (ShortUrbVol,'shorturbvol')]
 
 for data,name in things_to_save:
   save_dict_as_csv(data, name + '.csv')
-
-print('time-series successfully stored in csv files')
