@@ -1,5 +1,7 @@
 # PyVIN Network Flow Optimization Model
 
+### PyVIN is still in active development and is not production-ready
+
 Follow these 3 steps to install HOBBES network format components:
 
 Step 1: GitHub installation
