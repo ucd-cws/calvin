@@ -73,7 +73,7 @@ The HOBBES Matrix export will create ```networklinks.tsv```.
 
 ##### Run data_dat_compiler.py
   
-The ```data_dat_compiler.py``` script will use ```networklinks.tsv``` to create the ```data.dat``` file for Pyomo and ```linksupdated.tsv``` and ```nodesupdated.tsv``` that will be used for postprocessing the results. 
+The ```data_dat_compiler.py``` script will use ```networklinks.tsv``` to create the ```data.dat``` file. ```linksupdated.tsv``` and ```nodesupdated.tsv``` are used for postprocessing the results. 
 
 
 #### Template data.dat
