@@ -133,7 +133,7 @@ The ```aggregate_regions.py``` script appends the region name and supply type to
 
 The variety of data produced by PyVIN allows for many ways to visualizae the data. One example is the ```supply_portfolio_hatchedbarplot.py``` script, which plots the sum of flows by each CALVIN region, supply type, and urban/agricultural link type. The following figure is an example output of the script:
 
-![PyVIN Supply Portfolio Figure](/Users/Max/Desktop/SLURM/PyVIN_run/figure_1.png)
+![PyVIN Supply Portfolio Figure](https://github.com/msdogan/pyvin/blob/data_dat_compiler/postprocessor/supply_portfolio.png)
 
 
   
