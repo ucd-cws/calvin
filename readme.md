@@ -2,53 +2,20 @@
 
 ### PyVIN is still in active development and is not production-ready
 
-This documentation explains the process for creating a new PyVIN run either using data from the HOBBES network or self-created data. MORE INFO ON PYVIN. To learn more on the formulation of PyVIN, [detailed information](https://github.com/msdogan/pyvin/blob/master/Documentation/pyvin_documentation.pdf) is located in the Documentation folder.
+Follow these 3 steps to install HOBBES network format components:
 
-## Required Programs
-- [Python](https://www.continuum.io/downloads)
+Step 1: GitHub installation
 
-  The Anaconda platform conveniently installs Python and useful libraries such as [ScyPi]() and [NumPy]().
-  
-- [git](https://git-scm.com/downloads)
+https://docs.google.com/document/d/1b9SrHkWDmSJbUfp9oWGVoc9iDkROO3CiRScsc5OGYD4/edit
 
-- [Pyomo](https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html)
+Step 2: Nodejs installation
 
-  If using Anaconda, the following command line promptx will install Pyomo: 
-  ```
-  conda install -c cachemeorg pyomo=4.2.10784
-  conda install -c cachemeorg pyomo.extras=2.0
-  ```
-  
-  To run PyVIN, a solver needs to be specified. Examples: GLPK, CBC, CPLEX. If using Anaconda, use the following prompt to install          GLPK:
-  
-  ``` 
-  conda install pyomo pyomo.extras ipopt glpk --channel cachemeorg
-  ```
-  
-    Note: If working in Jon Herman's Group on the HPC1 cluster at UC Davis, solvers are already installed on the cluster.
-    
-## Getting Started
+https://docs.google.com/document/d/1ExARl8gffVxaG3zs-FJP-zBJejKk_KNxuJPYjFg_Vqk/edit#heading=h.53mxy8k62q2v
 
-### PyVIN Repository
+Step 3: Install and run network code
 
-A local version of the PyVIN repository is necessary to create the input files and run PyVIN. Pull the [PyVIN](https://github.com/msdogan/pyvin) repostiory to your local machine with the following command:
+https://docs.google.com/document/d/1lGeftVEqG29oMpNMte_GTC2krhkZutpp-2GdsonTzgA/edit#heading=h.ynb4aay64kqp
 
-```
-git clone https://github.com/msdogan/pyvin
-```
-
-### Creating data.dat
-
-```data.dat``` contains all data necessary to run ```pyvin.py```. There are 2 ways to create ```data.dat`` as described in the following 2 sections.
-
-#### HOBBES Network Matrix Export
-
-To run PyVIN using CALVIN data, the HOBBES network allows users to download data to form ```data.dat```.
-
-##### Create networklinks.tsv
-
-
-First, the [Calvin Network Tools repository](https://github.com/ucd-cws/calvin-network-tools) provides documentation on downloading the repository for data extraction from HOBBES. Once set up, the repository can be queried for data extraction:
 
 To create a model run (12 months) from HOBBES network: 
 ```
@@ -67,72 +34,9 @@ Example: SR_SHA and D5 between Oct 1983 to Sep 1984 in debug mode
 cnf matrix --format tsv --start 1983-10 --stop 1984-10 --ts . --fs :tab: --to networklinks --max-ub 10000000 --outnodes networknodes nodes SR_SHA D5 --debug SR_SHA,D5 --verbose
 ```
 
-The HOBBES Matrix export will create ```networklinks.tsv```.
-
-
-##### Run data_dat_compiler.py
-  
-The ```data_dat_compiler.py``` script will use ```networklinks.tsv``` to create the ```data.dat``` file for Pyomo and ```linksupdated.tsv``` and ```nodesupdated.tsv``` that will be used for postprocessing the results. 
-
-
-#### Template data.dat
-
-The other method besides using the HOBBES Network Export method is creating your own data.dat file. A template is included [here](https://github.com/msdogan/pyvin/blob/master/examples/SR_CLE-D94/data_sr_cle-d94.dat) and explained in the [Pyvin documentation](https://github.com/msdogan/pyvin/blob/master/Documentation/pyvin_documentation.pdf).
-
-In addition to ```data.dat```, ```linksupdated.tsv``` and ```nodesupdated.tsv``` are necessary to run the postprocessing scripts. These files contain data from ```data.dat``` but in a different format. Templates and instructions are provided [here](LINK).
-
-
-
-## Run PyVIN
-
-Once the input files are created, PyVIN can be run on a local machine or high performance computing cluster.  
-
-### Local Machine
 To run the optimization: 
 ```
 pyomo solve --solver=glpk --solver-suffix=dual pyvin.py data.dat --json --report-timing --stream-solver
 ```
-Note: ```pyvin.py``` and ```data.dat``` need to be located in the same same directory as where the command line prompt is being written.
 
-### HPC1 Instructions
-
-These instructions are specific to the [HPC1 Cluster](http://ssg.cs.ucdavis.edu/services/research/hpc1-cluster). In addition to the files above, a Slurm script (```filename.sh```) is necessary. Instructions on submitting PyVIN jobs to HPC1 are located [here](https://gist.github.com/jdherman/b48db79abb365363eb1fb8822417d996).
-
-## Postprocesing Data
-
-Once the optimization is complete, a ```results.json``` file is created. 
-
-To process the results into a series of CSV files, the script ```postprocess.py``` requires the following files:
-
-  - ```linksupdated.tsv```
-  - ```nodesupdated.tsv```
-  - ```demand_nodes.tsv```
-  - ```results.json```
-
-
-The ```postprocess.py``` script creates the following CSV files:
-
-  - ```flow.csv```
-  - ```storage.csv```
-  - ```dual_upper.csv```
-  - ```dual_lower.csv```
-  - ```dual_node.csv```
-  - ```evaporation.csv```
-  - ```shortage_cost.csv```
-  - ```shortage_volume.csv```
-
-The ```aggregate_regions.py``` script appends the region name and supply type to every link in the following CSVs created by ```postprocess.py```:
-
-  - ```flow.csv```
-  - ```demand_nodes.csv```
-  - ```shortage_volume.csv```
-  - ```shortage_cost.csv```
-
-### Example Data Visualization: Supply Portfoilio
-
-The variety of data produced by PyVIN allows for many ways to visualizae the data. One example is the ```supply_portfolio_hatchedbarplot.py``` script, which plots the sum of flows by each CALVIN region, supply type, and urban/agricultural link type. The following figure is an example output of the script:
-
-![PyVIN Supply Portfolio Figure](/Users/Max/Desktop/SLURM/PyVIN_run/figure_1.png)
-
-
-  
+Then run `postprocess.py` to format the results as time-series. 
