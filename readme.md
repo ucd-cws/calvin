@@ -5,7 +5,7 @@
 This documentation explains the process for creating a new PyVIN run either using data from the HOBBES network or self-created data. MORE INFO ON PYVIN. To learn more on the formulation of PyVIN, [detailed information](https://github.com/msdogan/pyvin/blob/master/Documentation/pyvin_documentation.pdf) is located in the Documentation folder.
 
 ## Required Programs
-- [Python](https://www.continuum.io/downloads)
+- [Python 3](https://www.continuum.io/downloads)
 
   The Anaconda platform conveniently installs Python and useful libraries such as [ScyPi]() and [NumPy]().
   
@@ -15,8 +15,8 @@ This documentation explains the process for creating a new PyVIN run either usin
 
   If using Anaconda, the following command line promptx will install Pyomo: 
   ```
-  conda install -c cachemeorg pyomo=4.2.10784
-  conda install -c cachemeorg pyomo.extras=2.0
+  conda install -c cachemeorg pyomo
+  conda install -c cachemeorg pyomo.extras
   ```
   
   To run PyVIN, a solver needs to be specified. Examples: GLPK, CBC, CPLEX. If using Anaconda, use the following prompt to install          GLPK:
@@ -53,27 +53,40 @@ First, the [Calvin Network Tools repository](https://github.com/ucd-cws/calvin-n
 
 To create a model run (12 months) from HOBBES network: 
 ```
-cnf matrix --format tsv --start 2002-10 --stop 2003-10 --ts . --fs :tab: --to networklinks --max-ub 1000000 --outnodes networknodes --verbose
+cnf matrix --format csv --start 2002-10 --stop 2003-10 --ts . --to links --max-ub 1000000 --verbose
 ```
+The following are additional flags that can be added to the command above:
 
-To add debug flows, use flag: 
 ```
---debug All
+    -h, --help                      output usage information
+    -f, --format <csv|tsv|dot|png>  Output Format, dot | png (graphviz required)
+    -N, --no-header                 Supress Header
+    -S, --ts <sep>                  Time step separator, default=@
+    -F, --fs <sep>                  Field Separator, default=,
+    -s, --start [YYYY-MM]           Specify start date for TimeSeries data
+    -t, --stop [YYYY-MM]            Specify stop date for TimeSeries data
+    -M, --max-ub <number>           Replace null upperbound with a big number.  Like 1000000
+    -d, --debug [nodes]             Set debug nodes.  Either "ALL", "*" or comma seperated list of prmnames (no spaces)
+    -d, --data [repo/path/data]     path to Calvin Network /data folder
+    -T, --to <filename>             Send matrix to filename, default=STDOUT
+    -O, --outnodes <filename>       Send list of nodes to filename, default=no output, can use STDOUT
+    -p, --outbound-penalty <json>   Specify a penalty function for outbound boundary conditions. eg. [[10000,"-10%"],[0,0],[-10000,"10%"]]
+
 ```
 
 To create a run with defined nodes only:
 
 Example: SR_SHA and D5 between Oct 1983 to Sep 1984 in debug mode
 ```
-cnf matrix --format tsv --start 1983-10 --stop 1984-10 --ts . --fs :tab: --to networklinks --max-ub 10000000 --outnodes networknodes nodes SR_SHA D5 --debug SR_SHA,D5 --verbose
+cnf matrix --format csv --start 1983-10 --stop 1984-10 --ts . --to links --max-ub 10000000 nodes SR_SHA D5 --debug SR_SHA,D5 --verbose
 ```
 
-The HOBBES Matrix export will create ```networklinks.tsv```.
+The HOBBES Matrix export will create ```links.csv```.
 
 
-##### Run data_dat_compiler.py
+##### Run compiler.py
   
-The ```data_dat_compiler.py``` script will use ```networklinks.tsv``` to create the ```data.dat``` file. ```linksupdated.tsv``` and ```nodesupdated.tsv``` are used for postprocessing the results. 
+The ```compiler.py``` script will use ```links.csv``` to create the ```data.dat``` file. ```linksupdated.tsv``` and ```nodesupdated.tsv``` are used for postprocessing the results. 
 
 
 #### Template data.dat
@@ -107,7 +120,7 @@ To process the results into a series of CSV files, the script ```postprocess.py`
 
   - ```linksupdated.tsv```
   - ```nodesupdated.tsv```
-  - ```demand_nodes.tsv```
+  - ```demand_nodes.csv```
   - ```results.json```
 
 
@@ -122,12 +135,7 @@ The ```postprocess.py``` script creates the following CSV files:
   - ```shortage_cost.csv```
   - ```shortage_volume.csv```
 
-The ```aggregate_regions.py``` script appends the region name and supply type to every link in the following CSVs created by ```postprocess.py```:
-
-  - ```flow.csv```
-  - ```demand_nodes.csv```
-  - ```shortage_volume.csv```
-  - ```shortage_cost.csv```
+The ```aggregate_regions.py``` script appends the region name and supply type to every link in the following CSVs created by ```postprocess.py```: ```flow.csv``` , ```demand_nodes.csv``` , ```shortage_volume.csv``` , ```shortage_cost.csv```.
 
 ### Example Data Visualization: Supply Portfoilio
 
