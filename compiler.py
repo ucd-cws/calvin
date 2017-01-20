@@ -2,7 +2,7 @@ import pandas as pd
 import csv
 
 #use only networklinks.tsv to create list of nodes
-df = pd.read_csv('networklinks.tsv',sep='\t',header=0)
+df = pd.read_csv('networklinks.csv',header=0)
 df.to_csv('linksupdated.tsv',sep='\t',index=False,header=False)
 df_sorted = pd.unique(df[['i','j']].values.ravel())
 nodes_test = df_sorted.tolist()
