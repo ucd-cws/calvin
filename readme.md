@@ -7,7 +7,7 @@ This documentation explains the process for creating a new PyVIN run either usin
 ## Required Programs
 - [Python 3](https://www.continuum.io/downloads)
 
-  The Anaconda platform conveniently installs Python and useful libraries such as [ScyPi]() and [NumPy]().
+  The Anaconda platform conveniently installs Python and useful libraries such as [SciPy](https://www.scipy.org/) and [NumPy](http://www.numpy.org/).
   
 - [git](https://git-scm.com/downloads)
 
