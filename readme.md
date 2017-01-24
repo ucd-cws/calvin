@@ -78,7 +78,7 @@ To create a run with defined nodes only:
 
 Example: SR_SHA and D5 between Oct 1983 to Sep 1984 in debug mode
 ```
-cnf matrix --format csv --start 1983-10 --stop 1984-10 --ts . --to links --max-ub 10000000 nodes SR_SHA D5 --debug SR_SHA,D5 --verbose
+cnf matrix --format csv --start 1983-10 --stop 1984-10 --ts . --to links --max-ub 10000000 nodes SR_SHA D5 --debug all --verbose
 ```
 
 The HOBBES Matrix export will create ```links.csv```.
