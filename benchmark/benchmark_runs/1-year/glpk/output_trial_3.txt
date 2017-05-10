@@ -1,0 +1,129 @@
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.00] Creating model
+      0.03 seconds required to construct component=N; 12952 indicies total
+         0 seconds required to construct component=k; 16 indicies total
+         0 seconds required to construct component=A_domain_index_0; 2684068864 indicies total
+         0 seconds required to construct component=A_domain; 2684068864 indicies total
+      0.31 seconds required to construct component=A; 61670 indicies total
+         0 seconds required to construct component=source; 1 indicies total
+         0 seconds required to construct component=sink; 1 indicies total
+      0.13 seconds required to construct component=u; 61670 indicies total
+      0.13 seconds required to construct component=l; 61670 indicies total
+      0.13 seconds required to construct component=a; 61670 indicies total
+      0.13 seconds required to construct component=c; 61670 indicies total
+      0.06 seconds required to construct component=X; 61670 indicies total
+      0.34 seconds required to construct component=total; 1 indicies total
+      0.75 seconds required to construct component=limit_upper; 61670 indicies total
+      0.75 seconds required to construct component=limit_lower; 61670 indicies total
+      0.25 seconds required to construct component=_; 61670 indicies total
+      1.17 seconds required to construct component=flow; 12950 indicies total
+             Cloning detected! (clone counters: 5868, 25850, 0)
+        4.18 seconds required to construct instance=unknown
+        0.00 seconds required for problem transformations
+[   16.34] Applying solver
+GLPSOL: GLPK LP/MIP Solver, v4.57
+Parameter(s) specified in the command line:
+ --write /tmp/tmpfy6r3eax.glpk.raw --wglp /tmp/tmp7ovhh6fg.glpk.glp --cpxlp
+ /tmp/tmpc_bbydun.pyomo.lp
+Reading problem data from '/tmp/tmpc_bbydun.pyomo.lp'...
+136291 rows, 61671 columns, 246643 non-zeros
+736528 lines were read
+Writing problem data to '/tmp/tmp7ovhh6fg.glpk.glp'...
+648953 lines were written
+GLPK Simplex Optimizer, v4.57
+136291 rows, 61671 columns, 246643 non-zeros
+Preprocessing...
+12937 rows, 57554 columns, 115108 non-zeros
+Scaling...
+ A: min|aij| =  8.453e-01  max|aij| =  1.000e+03  ratio =  1.183e+03
+GM: min|aij| =  3.130e-01  max|aij| =  3.195e+00  ratio =  1.021e+01
+EQ: min|aij| =  9.807e-02  max|aij| =  1.000e+00  ratio =  1.020e+01
+Constructing initial basis...
+Size of triangular part is 12937
+      0: obj =  -4.493867728e+11 inf =   1.618e+06 (1681)
+    500: obj =  -4.473950993e+11 inf =   1.616e+06 (1489) 1
+   1000: obj =   1.478811527e+11 inf =   1.554e+06 (1044) 1
+   1500: obj =   4.584776277e+12 inf =   9.438e+05 (675) 1
+   2000: obj =   1.197872583e+13 inf =   5.052e+04 (251) 1
+   2379: obj =   1.236169020e+13 inf =   3.141e-14 (0)
+*  2500: obj =   1.236137094e+13 inf =   3.141e-14 (14864) 1
+*  3000: obj =   1.235771553e+13 inf =   3.141e-14 (14729)
+*  3500: obj =   1.235225596e+13 inf =   3.141e-14 (14381)
+*  4000: obj =   1.234347643e+13 inf =   3.163e-14 (14439) 1
+*  4500: obj =   1.234104728e+13 inf =   3.163e-14 (13897)
+*  5000: obj =   1.232590596e+13 inf =   2.985e-14 (13964) 1
+*  5500: obj =   1.232009127e+13 inf =   2.985e-14 (13339)
+*  6000: obj =   1.230275430e+13 inf =   1.780e-14 (13372) 1
+*  6500: obj =   1.229849762e+13 inf =   1.904e-14 (13378)
+*  7000: obj =   1.228092811e+13 inf =   1.735e-14 (13152) 1
+*  7500: obj =   1.227725766e+13 inf =   1.772e-14 (12390)
+*  8000: obj =   1.225307933e+13 inf =   1.779e-14 (12001) 1
+*  8500: obj =   1.223806995e+13 inf =   1.735e-14 (11446) 1
+*  9000: obj =   1.222501019e+13 inf =   2.246e-15 (10384)
+*  9500: obj =   1.221974230e+13 inf =   2.288e-15 (10241) 1
+* 10000: obj =   1.221257255e+13 inf =   2.246e-15 (9919) 2
+* 10500: obj =   1.220482027e+13 inf =   2.246e-15 (10046) 1
+* 11000: obj =   1.207317763e+13 inf =   2.246e-15 (9940) 1
+* 11500: obj =   9.809515652e+12 inf =   2.704e-15 (9800) 1
+* 12000: obj =   9.597862997e+12 inf =   2.248e-15 (9532) 2
+* 12500: obj =   6.045569658e+12 inf =   2.246e-15 (9768) 2
+* 13000: obj =   5.456643278e+12 inf =   2.246e-15 (9557) 1
+* 13500: obj =   4.500404735e+12 inf =   3.299e-15 (9381) 1
+* 14000: obj =   3.606247244e+12 inf =   2.253e-15 (8857) 1
+* 14500: obj =   3.604507503e+12 inf =   2.246e-15 (8754) 1
+* 15000: obj =   2.860408175e+12 inf =   4.131e-15 (7646) 1
+* 15500: obj =   1.003212962e+12 inf =   3.637e-15 (7851) 2
+* 16000: obj =   4.540575274e+11 inf =   2.246e-15 (8583) 1
+* 16500: obj =   1.998215917e+11 inf =   8.075e-15 (8178) 1
+* 17000: obj =   1.965489648e+11 inf =   3.259e-15 (8087) 1
+* 17500: obj =   8.125178901e+10 inf =   3.768e-15 (8670) 1
+* 18000: obj =   7.957698260e+10 inf =   7.096e-15 (8423) 1
+* 18500: obj =   5.632699670e+10 inf =   2.788e-15 (7115) 1
+* 19000: obj =   4.275472075e+10 inf =   2.940e-15 (6744) 1
+* 19500: obj =   3.353783774e+10 inf =   6.197e-15 (6589) 1
+* 20000: obj =   2.857585675e+10 inf =   4.217e-15 (6677) 2
+* 20500: obj =   1.471274116e+10 inf =   5.945e-15 (7989) 1
+* 21000: obj =   7.403780272e+09 inf =   2.718e-15 (7393) 2
+* 21500: obj =   4.962561452e+08 inf =   9.786e-15 (6670) 2
+* 22000: obj =  -3.783358062e+08 inf =   1.067e-14 (6552) 1
+* 22500: obj =  -4.245957233e+08 inf =   5.508e-15 (6593) 2
+* 23000: obj =  -4.725292385e+08 inf =   3.394e-15 (6860) 2
+* 23500: obj =  -4.785130059e+08 inf =   2.692e-15 (6906) 2
+* 24000: obj =  -4.808197119e+08 inf =   8.101e-15 (6746)
+* 24500: obj =  -4.826305937e+08 inf =   3.875e-15 (6778) 1
+* 25000: obj =  -4.839335918e+08 inf =   3.053e-15 (5593) 1
+* 25500: obj =  -4.863038333e+08 inf =   4.913e-15 (5395) 2
+* 26000: obj =  -4.871943041e+08 inf =   5.022e-15 (6058)
+* 26500: obj =  -4.884240118e+08 inf =   1.941e-14 (5437) 1
+* 27000: obj =  -4.892780733e+08 inf =   1.402e-14 (4953) 2
+* 27500: obj =  -4.899881434e+08 inf =   1.756e-14 (4688) 1
+* 28000: obj =  -4.910858122e+08 inf =   7.291e-12 (4500) 1
+* 28500: obj =  -4.918887202e+08 inf =   7.385e-12 (4215) 2
+* 29000: obj =  -4.924340388e+08 inf =   7.389e-12 (4085)
+* 29500: obj =  -4.931047223e+08 inf =   7.292e-12 (3903) 2
+* 30000: obj =  -4.937661331e+08 inf =   7.457e-12 (3900) 2
+* 30500: obj =  -4.942386727e+08 inf =   3.830e-12 (2699) 1
+* 31000: obj =  -4.946957361e+08 inf =   3.829e-12 (2982) 2
+* 31500: obj =  -4.949925400e+08 inf =   3.831e-12 (2026) 1
+* 32000: obj =  -4.951498406e+08 inf =   3.865e-12 (2424) 1
+* 32500: obj =  -4.953257415e+08 inf =   3.618e-12 (1806) 3
+* 33000: obj =  -4.954764399e+08 inf =   2.301e-13 (1169) 3
+* 33500: obj =  -4.955636591e+08 inf =   9.209e-12 (1463) 2
+* 34000: obj =  -4.956223286e+08 inf =   7.855e-12 (923) 3
+* 34500: obj =  -4.956396276e+08 inf =   7.850e-12 (25) 4
+* 34547: obj =  -4.956396398e+08 inf =   4.382e-09 (0)
+OPTIMAL LP SOLUTION FOUND
+Time used:   21.2 secs
+Memory used: 102.2 Mb (107192220 bytes)
+Writing basic solution to '/tmp/tmpfy6r3eax.glpk.raw'...
+197964 lines were written
+[   50.06] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: feasible
+      Function Value: -495639639.76374435
+    Solver results file: results.json
+[   54.25] Applying Pyomo postprocessing actions
+[   54.25] Pyomo Finished

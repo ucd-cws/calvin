@@ -1,0 +1,86 @@
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.00] Creating model
+      0.16 seconds required to construct component=N; 64744 indicies total
+         0 seconds required to construct component=k; 16 indicies total
+         0 seconds required to construct component=A_domain_index_0; 67068568576 indicies total
+         0 seconds required to construct component=A_domain; 67068568576 indicies total
+      1.54 seconds required to construct component=A; 308138 indicies total
+         0 seconds required to construct component=source; 1 indicies total
+         0 seconds required to construct component=sink; 1 indicies total
+      0.68 seconds required to construct component=u; 308138 indicies total
+      0.68 seconds required to construct component=l; 308138 indicies total
+      0.68 seconds required to construct component=a; 308138 indicies total
+      0.68 seconds required to construct component=c; 308138 indicies total
+      0.32 seconds required to construct component=X; 308138 indicies total
+      1.78 seconds required to construct component=total; 1 indicies total
+      3.84 seconds required to construct component=limit_upper; 308138 indicies total
+      3.96 seconds required to construct component=limit_lower; 308138 indicies total
+      1.39 seconds required to construct component=_; 308138 indicies total
+      6.21 seconds required to construct component=flow; 64742 indicies total
+             Cloning detected! (clone counters: 29319, 129242, 0)
+       21.92 seconds required to construct instance=unknown
+        0.00 seconds required for problem transformations
+[   77.77] Applying solver
+Changed value of parameter QCPDual to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Changed value of parameter Threads to 32
+   Prev: 0  Min: 0  Max: 1024  Default: 0
+Optimize a model with 681019 rows, 308139 columns and 1232371 nonzeros
+Coefficient statistics:
+  Matrix range    [8e-01, 1e+03]
+  Objective range [1e-02, 2e+06]
+  Bounds range    [0e+00, 0e+00]
+  RHS range       [1e-03, 1e+12]
+
+Concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+Presolve removed 60920 rows and 329288 columns
+Presolve time: 1.42s
+Presolved: 247219 rows, 351731 columns, 1023271 nonzeros
+
+Ordering time: 2.51s
+
+Barrier statistics:
+ Dense cols : 120
+ Free vars  : 23518
+ AA' NZ     : 2.073e+06
+ Factor NZ  : 5.944e+06 (roughly 300 MBytes of memory)
+ Factor Ops : 5.740e+08 (less than 1 second per iteration)
+ Threads    : 30
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0  -3.53656043e+24  6.24781941e+10  4.48e+06 1.02e+15  4.47e+16     5s
+   1  -1.30895122e+25  7.25869756e+16  4.83e+06 1.02e+15  4.51e+16     5s
+   2  -2.95379019e+26 -3.62560028e+17  8.30e+06 1.02e+15  5.92e+16     5s
+   3  -2.15571766e+28 -3.86100804e+17  8.22e+06 1.02e+15  9.96e+17     6s
+   4  -2.38062113e+30 -5.53554958e+17  7.75e+06 1.02e+15  1.04e+20     6s
+   5  -2.86700240e+32 -7.18620662e+17  6.67e+06 1.02e+15  1.29e+22     6s
+   6  -3.24686440e+34 -1.05346181e+18  4.48e+06 1.02e+15  1.60e+24     7s
+
+Barrier performed 6 iterations in 6.60 seconds
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0      handle free variables                          7s
+   55530    4.0115104e+15   2.379856e+10   0.000000e+00     10s
+  106595    4.0000787e+15   2.858326e+10   0.000000e+00     15s
+
+Solved with dual simplex
+Solved in 78180 iterations and 19.74 seconds
+Optimal objective -2.478897755e+09
+Warning: unscaled primal violation = 0.00012207 and residual = 0.00012207
+[  143.98] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: optimal
+      Function Value: -2478897754.682021
+    Solver results file: results.json
+[  170.71] Applying Pyomo postprocessing actions
+[  170.71] Pyomo Finished

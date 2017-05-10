@@ -1,0 +1,173 @@
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.01] Creating model
+      1.29 seconds required to construct component=N; 517924 indicies total
+         0 seconds required to construct component=k; 16 indicies total
+         0 seconds required to construct component=A_domain_index_0; 4291924316416 indicies total
+         0 seconds required to construct component=A_domain; 4291924316416 indicies total
+     12.65 seconds required to construct component=A; 2464733 indicies total
+         0 seconds required to construct component=source; 1 indicies total
+         0 seconds required to construct component=sink; 1 indicies total
+      5.69 seconds required to construct component=u; 2464733 indicies total
+      5.68 seconds required to construct component=l; 2464733 indicies total
+      5.78 seconds required to construct component=a; 2464733 indicies total
+      5.67 seconds required to construct component=c; 2464733 indicies total
+      2.72 seconds required to construct component=X; 2464733 indicies total
+     13.97 seconds required to construct component=total; 1 indicies total
+     30.16 seconds required to construct component=limit_upper; 2464733 indicies total
+     30.77 seconds required to construct component=limit_lower; 2464733 indicies total
+     11.36 seconds required to construct component=_; 2464733 indicies total
+     48.47 seconds required to construct component=flow; 517922 indicies total
+             Cloning detected! (clone counters: 234483, 1033922, 0)
+      174.20 seconds required to construct instance=unknown
+        0.00 seconds required for problem transformations
+[  630.41] Applying solver
+Changed value of parameter QCPDual to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Changed value of parameter Threads to 32
+   Prev: 0  Min: 0  Max: 1024  Default: 0
+Optimize a model with 5447389 rows, 2464734 columns and 9857491 nonzeros
+Coefficient statistics:
+  Matrix range    [8e-01, 1e+03]
+  Objective range [1e-02, 2e+06]
+  Bounds range    [0e+00, 0e+00]
+  RHS range       [1e-03, 1e+12]
+
+Concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+Presolve removed 70771 rows and 2500000 columns (presolve time = 5s) ...
+Presolve removed 485978 rows and 2632326 columns (presolve time = 11s) ...
+Presolve removed 485978 rows and 2632326 columns
+Presolve time: 14.35s
+Presolved: 1978756 rows, 2815063 columns, 8189333 nonzeros
+
+Elapsed ordering time = 6s
+Elapsed ordering time = 11s
+Elapsed ordering time = 15s
+Elapsed ordering time = 20s
+Elapsed ordering time = 25s
+Ordering time: 31.20s
+
+Barrier statistics:
+ Dense cols : 960
+ Free vars  : 188246
+ AA' NZ     : 1.660e+07
+ Factor NZ  : 5.793e+07 (roughly 2.4 GBytes of memory)
+ Factor Ops : 1.112e+10 (roughly 1 second per iteration)
+ Threads    : 30
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0  -2.82935795e+25  5.22681419e+11  4.48e+06 1.02e+15  4.47e+16    52s
+   1  -1.04542617e+26  7.43090090e+17  4.83e+06 1.02e+15  4.51e+16    54s
+   2  -2.35553146e+27 -2.77887573e+18  8.30e+06 1.02e+15  5.92e+16    56s
+   3  -1.71477552e+29 -3.02966018e+18  8.22e+06 1.02e+15  9.91e+17    58s
+   4  -1.89247177e+31 -4.46389640e+18  7.74e+06 1.02e+15  1.04e+20    60s
+   5  -2.27726147e+33 -5.89790176e+18  6.67e+06 1.02e+15  1.28e+22    63s
+   6  -2.58962996e+35 -8.80563702e+18  4.48e+06 1.02e+15  1.59e+24    65s
+
+Barrier performed 6 iterations in 65.16 seconds
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0      handle free variables                         66s
+  164422      handle free variables                         70s
+  188246    1.8542145e+38   8.397992e+36   1.854214e+08     75s
+  188734    6.9192508e+37   3.180553e+36   6.919251e+07     83s
+  201113    2.0972204e+37   2.462505e+35   2.097220e+07    105s
+  213492    1.5987414e+37   1.703506e+35   1.598741e+07    115s
+  225871    1.1973344e+37   1.506201e+35   1.197334e+07    123s
+  238250    1.0680753e+37   1.329718e+35   1.068075e+07    132s
+  250629    7.0561744e+36   1.175052e+35   7.056174e+06    140s
+  263008    4.4076178e+36   1.001859e+35   4.407618e+06    148s
+  275387    2.7071150e+36   5.439342e+34   2.707115e+06    155s
+  287766    4.6422863e+35   2.317696e+34   4.642286e+05    159s
+  299670    5.4360153e+19   4.028961e+11   0.000000e+00    162s
+  312049    5.3880571e+19   3.657884e+11   0.000000e+00    171s
+  324428    4.9800572e+19   3.491904e+11   0.000000e+00    177s
+  336807    4.9800571e+19   3.070651e+11   0.000000e+00    182s
+  349186    4.1880571e+19   2.824365e+11   0.000000e+00    187s
+  361565    1.8684257e+19   2.487879e+11   0.000000e+00    192s
+  373944    1.1106017e+19   2.311243e+11   0.000000e+00    196s
+  386323    3.6460163e+18   2.235376e+11   0.000000e+00    200s
+  411081    6.0167233e+15   1.921162e+11   0.000000e+00    209s
+  423460    6.0163808e+15   1.785085e+11   0.000000e+00    212s
+  435839    6.0162441e+15   1.859540e+11   0.000000e+00    216s
+  460597    6.0153488e+15   1.900740e+11   0.000000e+00    224s
+  472976    6.0150855e+15   1.795497e+11   0.000000e+00    227s
+  485355    6.0149926e+15   1.725379e+11   0.000000e+00    231s
+  510113    6.0142102e+15   1.663117e+11   0.000000e+00    238s
+  522492    6.0140044e+15   1.386808e+11   0.000000e+00    241s
+  547250    6.0136146e+15   1.602058e+11   0.000000e+00    245s
+  584387    6.0128388e+15   1.252424e+11   0.000000e+00    251s
+  609145    6.0125823e+15   1.149102e+11   0.000000e+00    257s
+  633903    6.0124343e+15   1.091315e+11   0.000000e+00    263s
+  646282    6.0123474e+15   1.192728e+11   0.000000e+00    266s
+  671040    6.0113415e+15   1.044010e+11   0.000000e+00    272s
+  695798    6.0112105e+15   1.024895e+11   0.000000e+00    277s
+  708177    6.0111184e+15   1.502527e+11   0.000000e+00    280s
+  732935    6.0108717e+15   1.126456e+11   0.000000e+00    286s
+  757693    6.0107335e+15   9.168326e+10   0.000000e+00    291s
+  782451    6.0091093e+15   9.261670e+10   0.000000e+00    298s
+  794830    6.0083363e+15   6.859164e+10   0.000000e+00    300s
+  819588    6.0082232e+15   4.544982e+10   0.000000e+00    308s
+  831330    6.0074845e+15   5.205091e+10   0.000000e+00    311s
+  849267    6.0074296e+15   4.560602e+10   0.000000e+00    318s
+  861646    6.0066038e+15   4.231440e+10   0.000000e+00    321s
+  881694    6.0065274e+15   4.896958e+10   0.000000e+00    328s
+  888186    6.0064934e+15   5.456745e+11   0.000000e+00    331s
+  900341    6.0064333e+15   1.892497e+10   0.000000e+00    337s
+  912720    6.0061937e+15   2.477615e+10   0.000000e+00    340s
+  931790    6.0050666e+15   4.429001e+10   0.000000e+00    347s
+  941754    6.0045492e+15   3.607560e+10   0.000000e+00    351s
+  951876    6.0043642e+15   6.259023e+10   0.000000e+00    356s
+  962082    6.0036879e+15   4.398182e+11   0.000000e+00    362s
+  968703    6.0036406e+15   7.774038e+09   0.000000e+00    365s
+  981739    6.0024513e+15   1.521519e+10   0.000000e+00    371s
+  989144    6.0023509e+15   3.500624e+11   0.000000e+00    377s
+  994313    6.0023282e+15   1.838488e+10   0.000000e+00    383s
+  997255    6.0023216e+15   8.359857e+09   0.000000e+00    385s
+ 1004615    6.0023025e+15   2.179747e+10   0.000000e+00    392s
+ 1005979    6.0020903e+15   2.493367e+12   0.000000e+00    400s
+ 1006661    6.0020865e+15   4.242856e+12   0.000000e+00    406s
+ 1007343    6.0020826e+15   5.023445e+12   0.000000e+00    412s
+ 1008025    6.0020815e+15   7.961111e+12   0.000000e+00    417s
+ 1008707    6.0020800e+15   1.132248e+13   0.000000e+00    421s
+ 1010071    6.0020724e+15   6.634986e+12   0.000000e+00    429s
+ 1010753    6.0020682e+15   4.675726e+11   0.000000e+00    433s
+ 1011435    6.0020665e+15   2.902856e+10   0.000000e+00    437s
+ 1012117    6.0020650e+15   7.339458e+11   0.000000e+00    441s
+ 1012799    6.0020635e+15   1.437650e+12   0.000000e+00    446s
+ 1013481    6.0020588e+15   9.772844e+12   0.000000e+00    451s
+ 1015287    6.0020491e+15   3.384343e+11   0.000000e+00    457s
+ 1015969    6.0020473e+15   3.150676e+12   0.000000e+00    463s
+ 1016651    6.0020463e+15   3.323728e+12   0.000000e+00    467s
+ 1017333    6.0020448e+15   1.808242e+12   0.000000e+00    472s
+ 1018015    6.0020428e+15   6.688986e+10   0.000000e+00    480s
+ 1018697    6.0020411e+15   1.069146e+12   0.000000e+00    485s
+ 1020061    6.0020381e+15   3.961354e+11   0.000000e+00    499s
+ 1020743    6.0020364e+15   2.156277e+13   0.000000e+00    504s
+ 1021425    6.0020347e+15   1.246215e+13   0.000000e+00    508s
+ 1022107    6.0020333e+15   6.346245e+13   0.000000e+00    513s
+ 1022789    6.0020323e+15   1.215341e+13   0.000000e+00    519s
+ 1023471    6.0020306e+15   2.008330e+10   0.000000e+00    524s
+ 1024153    6.0020297e+15   1.378500e+12   0.000000e+00    528s
+ 1024835    6.0020286e+15   2.457970e+11   0.000000e+00    532s
+
+Solved with dual simplex
+Solved in 603328 iterations and 539.02 seconds
+Optimal objective -1.983931369e+10
+Warning: unscaled primal violation = 0.00012207 and residual = 0.00012207
+[ 1556.51] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: optimal
+      Function Value: -19839313688.81033
+    Solver results file: results.json
+[ 1763.23] Applying Pyomo postprocessing actions
+[ 1763.23] Pyomo Finished

@@ -1,0 +1,124 @@
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.02] Creating model
+      2.68 seconds required to construct component=N; 1061740 indicies total
+         0 seconds required to construct component=k; 16 indicies total
+         0 seconds required to construct component=A_domain_index_0; 18036669241600 indicies total
+         0 seconds required to construct component=A_domain; 18036669241600 indicies total
+     25.98 seconds required to construct component=A; 5052647 indicies total
+         0 seconds required to construct component=source; 1 indicies total
+         0 seconds required to construct component=sink; 1 indicies total
+     11.38 seconds required to construct component=u; 5052647 indicies total
+     11.60 seconds required to construct component=l; 5052647 indicies total
+     11.51 seconds required to construct component=a; 5052647 indicies total
+     11.39 seconds required to construct component=c; 5052647 indicies total
+      5.34 seconds required to construct component=X; 5052647 indicies total
+     29.35 seconds required to construct component=total; 1 indicies total
+     61.31 seconds required to construct component=limit_upper; 5052647 indicies total
+     64.12 seconds required to construct component=limit_lower; 5052647 indicies total
+     23.41 seconds required to construct component=_; 5052647 indicies total
+    101.56 seconds required to construct component=flow; 1061738 indicies total
+             Cloning detected! (clone counters: 480794, 2119538, 0)
+      359.63 seconds required to construct instance=unknown
+        0.00 seconds required for problem transformations
+[ 1270.31] Applying solver
+Changed value of parameter QCPDual to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Changed value of parameter Threads to 32
+   Prev: 0  Min: 0  Max: 1024  Default: 0
+Optimize a model with 11167033 rows, 5052648 columns and 20207635 nonzeros
+Coefficient statistics:
+  Matrix range    [8e-01, 1e+03]
+  Objective range [1e-02, 2e+06]
+  Bounds range    [0e+00, 0e+00]
+  RHS range       [1e-03, 1e+12]
+
+Concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+Presolve removed 141233 rows and 4940118 columns (presolve time = 6s) ...
+Presolve removed 141233 rows and 5121034 columns (presolve time = 11s) ...
+Presolve removed 996119 rows and 5396018 columns (presolve time = 16s) ...
+Presolve removed 996119 rows and 5396018 columns (presolve time = 24s) ...
+Presolve removed 996119 rows and 5396018 columns (presolve time = 25s) ...
+Presolve removed 996119 rows and 5396018 columns
+Presolve time: 30.31s
+Presolved: 4056529 rows, 5771015 columns, 16788546 nonzeros
+
+Elapsed ordering time = 17s
+Elapsed ordering time = 22s
+Elapsed ordering time = 26s
+Elapsed ordering time = 31s
+Elapsed ordering time = 35s
+Elapsed ordering time = 40s
+Elapsed ordering time = 45s
+Elapsed ordering time = 50s
+Elapsed ordering time = 55s
+Elapsed ordering time = 60s
+Ordering time: 71.87s
+
+Barrier statistics:
+ Dense cols : 1968
+ Free vars  : 385881
+ AA' NZ     : 3.403e+07
+ Factor NZ  : 1.356e+08 (roughly 5.0 GBytes of memory)
+ Factor Ops : 4.297e+10 (roughly 1 second per iteration)
+ Threads    : 30
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0  -5.80023401e+25  9.33509647e+11  4.48e+06 1.02e+15  4.47e+16   117s
+   1  -2.14275280e+26  1.61803396e+18  4.83e+06 1.02e+15  4.51e+16   121s
+   2  -4.82788671e+27 -5.61915354e+18  8.30e+06 1.02e+15  5.92e+16   125s
+   3  -3.51619603e+29 -6.17647147e+18  8.22e+06 1.02e+15  9.91e+17   131s
+   4  -3.87490936e+31 -9.19921025e+18  7.74e+06 1.02e+15  1.04e+20   137s
+   5  -4.65196275e+33 -1.22162909e+19  6.66e+06 1.02e+15  1.27e+22   145s
+   6  -5.28043580e+35 -1.83219988e+19  4.48e+06 1.02e+15  1.58e+24   151s
+
+Barrier performed 6 iterations in 150.97 seconds
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0      handle free variables                        153s
+  114420      handle free variables                        155s
+  321890      handle free variables                        161s
+  337188      handle free variables                        165s
+  342942      handle free variables                        173s
+  385881    4.4124021e+38   2.292780e+37   4.412402e+08    181s
+  386287    2.3321488e+38   1.297447e+37   2.332149e+08    193s
+  406025    3.8987384e+37   7.540811e+35   3.898738e+07    275s
+  425763    3.1480606e+37   4.039092e+35   3.148061e+07    306s
+  445501    2.3894489e+37   3.334083e+35   2.389449e+07    332s
+  465239    1.9416394e+37   3.045832e+35   1.941639e+07    357s
+  484977    1.6708651e+37   2.738775e+35   1.670865e+07    381s
+  504715    1.0271362e+37   2.378206e+35   1.027136e+07    403s
+  524453    7.0572117e+36   2.336343e+35   7.057212e+06    425s
+  544191    6.2186772e+36   1.730734e+35   6.218677e+06    443s
+  563929    4.3800049e+36   1.088218e+35   4.380005e+06    457s
+  583667    2.8882470e+36   5.563507e+34   2.888247e+06    467s
+  603405    1.6121824e+35   6.268929e+33   1.612182e+05    472s
+  608605    1.8770102e+20   8.451994e+11   2.146414e+12    476s
+  621493    1.8770100e+20   4.108110e+11   1.353780e+12    770s
+  641231    1.8770100e+20   3.639483e+11   1.174238e+12   1116s
+  660969    1.8770099e+20   3.377180e+11   1.075858e+12   1446s
+  680707    1.8770099e+20   3.249572e+11   1.035168e+12   1770s
+
+Solved with dual simplex
+Solved in 1258054 iterations and 1783.90 seconds
+Optimal objective -4.066875009e+10
+Warning: unscaled primal violation = 0.00012207 and residual = 0.00012207
+[ 3859.79] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: optimal
+      Function Value: -40668750087.30053
+    Solver results file: results.json
+[ 4321.68] Applying Pyomo postprocessing actions
+[ 4321.68] Pyomo Finished
+ile: results.json
+[ 5069.93] Applying Pyomo postprocessing actions
+[ 5069.93] Pyomo Finished

@@ -1,0 +1,146 @@
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.00] Creating model
+      0.03 seconds required to construct component=N; 12952 indicies total
+         0 seconds required to construct component=k; 16 indicies total
+         0 seconds required to construct component=A_domain_index_0; 2684068864 indicies total
+         0 seconds required to construct component=A_domain; 2684068864 indicies total
+      0.31 seconds required to construct component=A; 61670 indicies total
+         0 seconds required to construct component=source; 1 indicies total
+         0 seconds required to construct component=sink; 1 indicies total
+      0.13 seconds required to construct component=u; 61670 indicies total
+      0.13 seconds required to construct component=l; 61670 indicies total
+      0.13 seconds required to construct component=a; 61670 indicies total
+      0.13 seconds required to construct component=c; 61670 indicies total
+      0.06 seconds required to construct component=X; 61670 indicies total
+      0.35 seconds required to construct component=total; 1 indicies total
+      0.74 seconds required to construct component=limit_upper; 61670 indicies total
+      0.76 seconds required to construct component=limit_lower; 61670 indicies total
+      0.26 seconds required to construct component=_; 61670 indicies total
+      1.21 seconds required to construct component=flow; 12950 indicies total
+             Cloning detected! (clone counters: 5858, 25850, 0)
+        4.23 seconds required to construct instance=unknown
+        0.00 seconds required for problem transformations
+[   15.22] Applying solver
+
+Welcome to IBM(R) ILOG(R) CPLEX(R) Interactive Optimizer 12.6.3.0
+  with Simplex, Mixed Integer & Barrier Optimizers
+5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 5655-Y21
+Copyright IBM Corp. 1988, 2015.  All Rights Reserved.
+
+Type 'help' for a list of available commands.
+Type 'help' followed by a command name for more
+information on commands.
+
+CPLEX> Logfile 'cplex.log' closed.
+Logfile '/tmp/tmpqe6ac6uv.cplex.log' open.
+CPLEX> New value for default parallel thread count: 32
+CPLEX> Problem '/tmp/tmplb4ohnbb.pyomo.lp' read.
+Read time = 0.15 sec. (12.52 ticks)
+CPLEX> Problem name         : /tmp/tmplb4ohnbb.pyomo.lp
+Objective sense      : Minimize
+Variables            :   61671  [Nneg: 1,  Free: 61670]
+Objective nonzeros   :   19334
+Linear constraints   :  136291  [Less: 61670,  Greater: 61670,  Equal: 12951]
+  Nonzeros           :  246643
+  RHS nonzeros       :   63268
+
+Variables            : Min LB: 0.000000         Max UB: all infinite   
+Objective nonzeros   : Min   : 0.01000000       Max   : 2000000.       
+Linear constraints   :
+  Nonzeros           : Min   : 0.8453085        Max   : 1000.000       
+  RHS nonzeros       : Min   : 0.001000000      Max   : 1.000000e+12   
+CPLEX> Parallel mode: deterministic, using up to 32 threads for concurrent optimization.
+Tried aggregator 1 time.
+LP Presolve eliminated 123354 rows and 4549 columns.
+Reduced LP has 12937 rows, 57122 columns, and 114232 nonzeros.
+Presolve time = 0.07 sec. (56.60 ticks)
+Initializing dual steep norms . . .
+
+Iteration log . . .
+Iteration:     1   Dual objective     = -3907701993236.135742
+Perturbation started.
+Iteration:   303   Dual objective     = -2131701993615.413086
+Iteration:   342   Dual objective     = -2131684567906.038818
+Iteration:   661   Dual objective     = -1362068442777.328857
+Iteration:   925   Dual objective     = -1362058401832.804932
+Iteration:  1202   Dual objective     = -178055066611.697754
+Iteration:  1424   Dual objective     = -178049686461.860046
+Iteration:  1671   Dual objective     = -119447999131.887848
+Iteration:  1887   Dual objective     = -119439997282.853500
+Iteration:  2235   Dual objective     =    -471213595.751242
+Iteration:  2669   Dual objective     =    -471192686.956640
+Iteration:  2933   Dual objective     =    -471142380.697978
+Iteration:  3152   Dual objective     =    -471098649.247182
+Iteration:  3350   Dual objective     =    -471065298.816350
+Iteration:  3496   Dual objective     =    -471059931.426122
+Iteration:  3672   Dual objective     =    -470974680.697757
+Iteration:  3791   Dual objective     =    -470938814.130230
+Iteration:  3958   Dual objective     =    -470934034.478655
+Iteration:  4148   Dual objective     =    -470834763.593107
+Iteration:  4294   Dual objective     =    -470834287.307458
+Iteration:  4429   Dual objective     =    -470834287.251385
+Iteration:  4613   Dual objective     =    -470831279.319987
+Iteration:  4956   Dual objective     =    -470803177.923260
+Iteration:  5243   Dual objective     =    -470736425.805896
+Iteration:  5625   Dual objective     =    -470581153.155562
+Iteration:  5943   Dual objective     =    -470392309.972124
+Iteration:  6229   Dual objective     =    -470118361.325561
+Iteration:  6401   Dual objective     =    -470043054.091475
+Iteration:  6627   Dual objective     =    -469858298.879831
+Iteration:  6841   Dual objective     =    -469675653.908863
+Iteration:  7102   Dual objective     =    -469514408.596083
+Iteration:  7291   Dual objective     =    -469427609.892487
+Iteration:  7480   Dual objective     =    -469318777.587354
+Iteration:  7729   Dual objective     =    -469157999.399463
+Iteration:  7848   Dual objective     =    -468969167.809768
+Iteration:  7980   Dual objective     =    -468964115.113491
+Iteration:  8228   Dual objective     =    -468829453.824865
+Iteration:  8462   Dual objective     =    -468719026.697329
+Iteration:  8669   Dual objective     =    -468589788.257269
+Iteration:  8898   Dual objective     =    -468457639.758785
+Iteration:  9150   Dual objective     =    -468325664.575559
+Iteration:  9380   Dual objective     =    -468214759.052356
+Iteration:  9533   Dual objective     =    -468122563.751838
+Iteration:  9746   Dual objective     =    -467943361.520039
+Iteration:  9986   Dual objective     =    -467685288.075832
+Iteration: 10190   Dual objective     =    -467358799.153486
+Iteration: 10395   Dual objective     =    -467066110.145044
+Iteration: 10651   Dual objective     =    -466691086.177644
+Iteration: 10809   Dual objective     =    -466614748.986407
+Iteration: 11026   Dual objective     =    -466275563.629469
+Iteration: 11224   Dual objective     =    -466151858.904324
+Iteration: 11398   Dual objective     =    -465965362.457069
+Iteration: 11662   Dual objective     =    -465752561.776914
+Iteration: 11886   Dual objective     =    -465536047.759601
+Iteration: 12105   Dual objective     =    -465314173.292283
+Iteration: 12317   Dual objective     =    -465231099.541527
+Iteration: 12489   Dual objective     =    -465142677.308202
+Iteration: 12673   Dual objective     =    -465025399.116121
+Iteration: 12851   Dual objective     =    -464973156.422827
+Iteration: 12977   Dual objective     =    -464879438.274627
+Iteration: 13149   Dual objective     =    -464835795.807420
+Iteration: 13351   Dual objective     =    -464803254.029922
+Iteration: 13509   Dual objective     =    -464794021.148609
+Iteration: 13581   Dual objective     =    -464792834.887275
+Iteration: 13736   Dual objective     =    -464791204.372631
+Removing perturbation.
+Iteration: 13783   Dual objective     =    -495639639.763747
+
+Primal simplex solved model.
+
+
+Primal simplex - Optimal:  Objective = -4.9563963976e+08
+Solution time =    2.34 sec.  Iterations = 36785 (4005)
+Deterministic time = 2090.96 ticks  (894.54 ticks/sec)
+
+CPLEX> Solution written to file '/tmp/tmpo5ms96yh.cplex.sol'.
+CPLEX> [   26.88] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: optimal
+      Function Value: -495639639.76374274
+    Solver results file: results.json
+[   31.56] Applying Pyomo postprocessing actions
+[   31.56] Pyomo Finished

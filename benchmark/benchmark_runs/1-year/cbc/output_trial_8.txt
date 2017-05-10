@@ -1,0 +1,147 @@
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.00] Creating model
+      0.03 seconds required to construct component=N; 12952 indicies total
+         0 seconds required to construct component=k; 16 indicies total
+         0 seconds required to construct component=A_domain_index_0; 2684068864 indicies total
+         0 seconds required to construct component=A_domain; 2684068864 indicies total
+      0.31 seconds required to construct component=A; 61670 indicies total
+         0 seconds required to construct component=source; 1 indicies total
+         0 seconds required to construct component=sink; 1 indicies total
+      0.13 seconds required to construct component=u; 61670 indicies total
+      0.13 seconds required to construct component=l; 61670 indicies total
+      0.13 seconds required to construct component=a; 61670 indicies total
+      0.13 seconds required to construct component=c; 61670 indicies total
+      0.06 seconds required to construct component=X; 61670 indicies total
+      0.35 seconds required to construct component=total; 1 indicies total
+      0.75 seconds required to construct component=limit_upper; 61670 indicies total
+      0.78 seconds required to construct component=limit_lower; 61670 indicies total
+      0.26 seconds required to construct component=_; 61670 indicies total
+      1.20 seconds required to construct component=flow; 12950 indicies total
+             Cloning detected! (clone counters: 5863, 25850, 0)
+        4.25 seconds required to construct instance=unknown
+        0.00 seconds required for problem transformations
+[   15.27] Applying solver
+Welcome to the CBC MILP Solver 
+Version: 2.9 
+Build Date: Aug 19 2016 
+
+command line - /group/hermangrp/cbc/bin/cbc -threads 32 -printingOptions all -import /tmp/tmplchkm6gw.pyomo.lp -import -stat=1 -solve -solu /tmp/tmplchkm6gw.pyomo.soln (default strategy 1)
+threads was changed from 0 to 32
+Option for printingOptions changed from normal to all
+Current default (if $ as parameter) for import is /tmp/tmplchkm6gw.pyomo.lp
+Presolve 12937 (-123354) rows, 57282 (-4389) columns and 114552 (-132091) elements
+Statistics for presolved model
+
+
+Problem has 12937 rows, 57282 columns (18205 with objective) and 114552 elements
+There are 12 singletons with objective 
+Column breakdown:
+0 of type 0.0->inf, 56418 of type 0.0->up, 0 of type lo->inf, 
+861 of type lo->up, 0 of type free, 0 of type fixed, 
+0 of type -inf->0.0, 0 of type -inf->up, 3 of type 0.0->1.0 
+Row breakdown:
+10435 of type E 0.0, 14 of type E 1.0, 22 of type E -1.0, 
+2453 of type E other, 0 of type G 0.0, 0 of type G 1.0, 
+0 of type G other, 0 of type L 0.0, 0 of type L 1.0, 
+0 of type L other, 0 of type Range 0.0->1.0, 13 of type Range other, 
+0 of type Free 
+Presolve 12937 (-123354) rows, 57282 (-4389) columns and 114552 (-132091) elements
+Perturbing problem by 0.001 %% of 3690.2989 - largest nonzero change 0.0037901264 (%% 4.2632424) - largest zero change 0.001895133
+0  Obj -220192.77 Primal inf 6337494.6 (2923) Dual inf 4.370122e+08 (14115)
+0  Obj -220216.84 Primal inf 6337494.6 (2923) Dual inf 2.6945205e+14 (19585)
+301  Obj -63834125 Primal inf 6330471.3 (2776) Dual inf 2.5144792e+14 (18175)
+596  Obj -67304295 Primal inf 6322450.3 (2617) Dual inf 2.4054627e+14 (17033)
+886  Obj -67315285 Primal inf 6316400 (2440) Dual inf 2.2387408e+14 (16121)
+1176  Obj -67482262 Primal inf 6306820.5 (2281) Dual inf 2.1622248e+14 (15407)
+1465  Obj -68088629 Primal inf 6199533 (2175) Dual inf 1.7510894e+14 (14403)
+1754  Obj -471110.13 Primal inf 6177088 (2100) Dual inf 1.8928493e+14 (13869)
+2051  Obj -987234.12 Primal inf 6152381.5 (2028) Dual inf 1.8595163e+14 (13422)
+2343  Obj 15197752 Primal inf 6124593.5 (1956) Dual inf 1.8546663e+14 (13148)
+2635  Obj 15319663 Primal inf 6110537.4 (1919) Dual inf 1.8110165e+14 (13059)
+2928  Obj 13843827 Primal inf 6038222.5 (1865) Dual inf 1.8169605e+14 (12859)
+3231  Obj 58204062 Primal inf 6031096.3 (1807) Dual inf 1.858678e+14 (12741)
+3533  Obj 58442036 Primal inf 6027318 (1756) Dual inf 1.8863622e+14 (12817)
+3863  Obj 90516127 Primal inf 6020212.1 (1710) Dual inf 1.9843868e+14 (13236)
+4166  Obj 98423608 Primal inf 6016801 (1660) Dual inf 2.0231253e+14 (13336)
+4466  Obj 97974169 Primal inf 6015124.6 (1624) Dual inf 2.108634e+14 (13535)
+4767  Obj 2.997951e+12 Primal inf 4500680.6 (1534) Dual inf 1.9627228e+14 (13298)
+5073  Obj 3.0052959e+12 Primal inf 4445053 (1437) Dual inf 1.9326638e+14 (12968)
+5378  Obj 3.0111207e+12 Primal inf 4438983.5 (1313) Dual inf 1.7514787e+14 (12630)
+5700  Obj 3.6704375e+12 Primal inf 4102760.7 (1122) Dual inf 1.8020991e+14 (12285)
+6021  Obj 4.7756264e+12 Primal inf 3550536.7 (898) Dual inf 1.6130949e+14 (11611)
+6343  Obj 4.9744435e+12 Primal inf 3456643.6 (674) Dual inf 1.3305313e+14 (10989)
+6671  Obj 8.7330794e+12 Primal inf 1412347 (448) Dual inf 8.2123928e+13 (9914)
+7012  Obj 9.9668507e+12 Primal inf 835430.89 (258) Dual inf 4.1556898e+13 (9274)
+7381  Obj 1.1597808e+13 Primal inf 22997.971 (50) Dual inf 6.3911415e+12 (8633)
+7711  Obj 1.1955872e+13 Dual inf 2.2307059e+10 (8323)
+8089  Obj 1.1943042e+13 Dual inf 1.9924492e+10 (8352)
+8439  Obj 1.1937461e+13 Dual inf 2.030412e+10 (8515)
+8832  Obj 1.1926185e+13 Dual inf 1.8785379e+10 (8314)
+9212  Obj 8.456438e+12 Dual inf 1.8534726e+10 (8082)
+9552  Obj 5.6097981e+12 Dual inf 2.0454515e+10 (8273)
+9869  Obj 3.8214501e+12 Dual inf 1.9809973e+10 (8247)
+10196  Obj 3.8147101e+12 Dual inf 1.8887399e+10 (8106)
+10583  Obj 3.8074678e+12 Dual inf 1.6817852e+10 (8106)
+10927  Obj 2.3208946e+12 Dual inf 1.8621729e+10 (8185)
+11271  Obj 2.3155894e+12 Dual inf 1.9361493e+10 (8459)
+11676  Obj 2.3065844e+12 Dual inf 1.8252829e+10 (8585)
+12055  Obj 2.2971865e+12 Dual inf 1.7888637e+10 (8454)
+12475  Obj 2.2938099e+12 Dual inf 1.9433633e+10 (8587)
+12984  Obj 2.2644465e+12 Dual inf 1.9917077e+10 (9312)
+13517  Obj 2.1557496e+12 Dual inf 1.9227026e+10 (8693)
+14061  Obj 1.8830562e+11 Dual inf 1.9814578e+10 (8831)
+14482  Obj 1.716681e+11 Dual inf 2.5788375e+10 (9530)
+15015  Obj 7.4500681e+10 Dual inf 2.2489885e+10 (9277)
+15554  Obj 4.2163263e+10 Dual inf 2.6362761e+10 (9843)
+16106  Obj 3.7164818e+10 Dual inf 2.22536e+10 (9996)
+16638  Obj 3.4460975e+10 Dual inf 2.2650117e+10 (10054)
+17156  Obj 3.1760344e+10 Dual inf 2.5891707e+10 (10259)
+17709  Obj 2.7054529e+10 Dual inf 1.991539e+10 (9093)
+18287  Obj 2.3580042e+10 Dual inf 1.9591747e+10 (9413)
+18865  Obj 1.7025592e+10 Dual inf 2.8679302e+10 (8930)
+19443  Obj 1.1637858e+10 Dual inf 8.2245964e+09 (7761)
+20021  Obj 1.2502842e+09 Dual inf 1.807848e+09 (7368)
+20486  Obj -3.1056985e+08 Dual inf 4.7687179e+08 (7506)
+20840  Obj -3.3626505e+08 Dual inf 3.4162193e+08 (7502)
+21248  Obj -3.8650886e+08 Dual inf 2.6585888e+08 (7201)
+21717  Obj -4.2104331e+08 Dual inf 2.2795599e+08 (7067)
+22090  Obj -4.616733e+08 Dual inf 1.2010881e+08 (7711)
+22491  Obj -4.7299374e+08 Dual inf 40421118 (7619)
+23069  Obj -4.7889489e+08 Dual inf 33372479 (7293)
+23647  Obj -4.8071794e+08 Dual inf 30307574 (6812)
+24225  Obj -4.8245603e+08 Dual inf 45432419 (7016)
+24803  Obj -4.834095e+08 Dual inf 17912662 (6102)
+25381  Obj -4.8449586e+08 Dual inf 13662559 (5883)
+25959  Obj -4.8581755e+08 Dual inf 10299256 (5481)
+26537  Obj -4.8692079e+08 Dual inf 8876706.2 (5399)
+27115  Obj -4.8833733e+08 Dual inf 6640987.4 (4710)
+27693  Obj -4.8935243e+08 Dual inf 6215477.2 (4804)
+28271  Obj -4.9048333e+08 Dual inf 4398559.4 (4457)
+28849  Obj -4.9152153e+08 Dual inf 2730823.1 (3669)
+29427  Obj -4.9294706e+08 Dual inf 3425286.8 (3925)
+30005  Obj -4.9370104e+08 Dual inf 2452497 (3606)
+30583  Obj -4.9438572e+08 Dual inf 1540971.3 (2952)
+31161  Obj -4.9480036e+08 Dual inf 970762.01 (2939)
+31739  Obj -4.9507783e+08 Dual inf 432987.21 (2140)
+32317  Obj -4.9527439e+08 Dual inf 302682.59 (2080)
+32821  Obj -4.9544104e+08 Dual inf 202705.58 (1832)
+33258  Obj -4.9553927e+08 Dual inf 69215.887 (1448)
+33655  Obj -4.9558961e+08 Dual inf 20207.664 (1002)
+33974  Obj -4.9562472e+08 Dual inf 3848.5986 (516)
+34301  Obj -4.9563931e+08 Dual inf 97.707827 (117)
+34445  Obj -4.9563964e+08
+Optimal - objective value -4.9563964e+08
+After Postsolve, objective -4.9563964e+08, infeasibilities - dual 0 (0), primal 0 (0)
+Optimal objective -495639639.8 - 34445 iterations time 2.462, Presolve 0.10
+Total time (CPU seconds):       3.39   (Wallclock seconds):       3.35
+
+[   30.64] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: optimal
+      Function Value: -495639639.7660805
+    Solver results file: results.json
+[   34.82] Applying Pyomo postprocessing actions
+[   34.82] Pyomo Finished

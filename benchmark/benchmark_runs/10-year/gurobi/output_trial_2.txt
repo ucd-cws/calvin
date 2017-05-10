@@ -1,0 +1,93 @@
+[    0.00] Setting up Pyomo environment
+[    0.00] Applying Pyomo preprocessing actions
+[    0.00] Creating model
+      0.33 seconds required to construct component=N; 129484 indicies total
+         0 seconds required to construct component=k; 16 indicies total
+         0 seconds required to construct component=A_domain_index_0; 268257700096 indicies total
+         0 seconds required to construct component=A_domain; 268257700096 indicies total
+      3.21 seconds required to construct component=A; 616223 indicies total
+         0 seconds required to construct component=source; 1 indicies total
+         0 seconds required to construct component=sink; 1 indicies total
+      1.43 seconds required to construct component=u; 616223 indicies total
+      1.43 seconds required to construct component=l; 616223 indicies total
+      1.41 seconds required to construct component=a; 616223 indicies total
+      1.41 seconds required to construct component=c; 616223 indicies total
+      0.64 seconds required to construct component=X; 616223 indicies total
+      3.51 seconds required to construct component=total; 1 indicies total
+      7.46 seconds required to construct component=limit_upper; 616223 indicies total
+      7.64 seconds required to construct component=limit_lower; 616223 indicies total
+      2.76 seconds required to construct component=_; 616223 indicies total
+     12.06 seconds required to construct component=flow; 129482 indicies total
+             Cloning detected! (clone counters: 58636, 258482, 0)
+       43.30 seconds required to construct instance=unknown
+        0.00 seconds required for problem transformations
+[  155.99] Applying solver
+Changed value of parameter QCPDual to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Changed value of parameter Threads to 32
+   Prev: 0  Min: 0  Max: 1024  Default: 0
+Optimize a model with 1361929 rows, 616224 columns and 2464531 nonzeros
+Coefficient statistics:
+  Matrix range    [8e-01, 1e+03]
+  Objective range [1e-02, 2e+06]
+  Bounds range    [0e+00, 0e+00]
+  RHS range       [1e-03, 1e+12]
+
+Concurrent LP optimizer: primal simplex, dual simplex, and barrier
+Showing barrier log only...
+
+Presolve removed 121630 rows and 658296 columns
+Presolve time: 3.02s
+Presolved: 494594 rows, 703633 columns, 2047012 nonzeros
+
+Elapsed ordering time = 5s
+Ordering time: 5.93s
+
+Barrier statistics:
+ Dense cols : 240
+ Free vars  : 47063
+ AA' NZ     : 4.148e+06
+ Factor NZ  : 1.242e+07 (roughly 600 MBytes of memory)
+ Factor Ops : 1.458e+09 (less than 1 second per iteration)
+ Threads    : 30
+
+                  Objective                Residual
+Iter       Primal          Dual         Primal    Dual     Compl     Time
+   0  -7.07326197e+24  1.63922660e+11  4.48e+06 1.02e+15  4.47e+16    10s
+   1  -2.61700911e+25  1.71454638e+17  4.83e+06 1.02e+15  4.51e+16    11s
+   2  -5.90545771e+26 -7.07087788e+17  8.30e+06 1.02e+15  5.92e+16    12s
+   3  -4.31035133e+28 -7.63960902e+17  8.22e+06 1.02e+15  9.96e+17    12s
+   4  -4.76070376e+30 -1.11628624e+18  7.75e+06 1.02e+15  1.04e+20    13s
+   5  -5.73094823e+32 -1.46397495e+18  6.67e+06 1.02e+15  1.29e+22    14s
+   6  -6.50393609e+34 -2.16702485e+18  4.48e+06 1.02e+15  1.60e+24    14s
+
+Barrier performed 6 iterations in 14.27 seconds
+Numerical trouble encountered
+
+Model may be infeasible or unbounded.  Consider using the
+homogeneous algorithm (through parameter 'BarHomogeneous')
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0      handle free variables                         15s
+   38808      handle free variables                         15s
+   67641    9.8060710e+35   2.855230e+34   9.806071e+05     20s
+  145052    2.0010387e+16   3.454929e+10   0.000000e+00     25s
+  200386    2.0003346e+16   4.328211e+10   0.000000e+00     31s
+  216822    2.0001836e+16   1.259448e+10   0.000000e+00     35s
+  232972    2.0000086e+16   1.174253e+10   0.000000e+00     40s
+  240664    2.0000005e+16   2.568083e+09   0.000000e+00     45s
+  245120   -4.7003482e+09   6.770372e+08   0.000000e+00     50s
+
+Solved with dual simplex
+Solved in 152824 iterations and 51.54 seconds
+Optimal objective -4.959769796e+09
+Warning: unscaled primal violation = 0.00012207 and residual = 0.00012207
+[  299.30] Processing results
+    Number of solutions: 1
+    Solution Information
+      Gap: 0.0
+      Status: optimal
+      Function Value: -4959769796.459538
+    Solver results file: results.json
+[  353.32] Applying Pyomo postprocessing actions
+[  353.32] Pyomo Finished
