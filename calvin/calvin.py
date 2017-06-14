@@ -3,7 +3,7 @@ from pyomo.opt import TerminationCondition
 import numpy as np
 import pandas as pd
 
-class Network():
+class CALVIN():
 
   def __init__(self, linksfile):
     df = pd.read_csv(linksfile)
@@ -11,11 +11,14 @@ class Network():
     df.set_index('link', inplace=True)
     self.nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
     self.links = list(zip(df.i,df.j,df.k))
-    self.df = df
 
+    self.df = df
     self.T = len(self.df)
     self.networkcheck()
 
+  def inflow_multiplier(self, x):
+    ix = self.df.i.str.contains('INFLOW')
+    self.df.loc[ix, ['lower_bound','upper_bound']] *= x
 
   def networkcheck(self):
     nodes = self.nodes
@@ -54,7 +57,24 @@ class Network():
         raise ValueError('lb_in > ub_out for %s (%d > %d)' % (n, lb_in[n], ub_out[n]))
 
 
-  def create_pyomo_model(self):
+  def remove_debug_links(self):
+    df = self.df
+    ix = df.index[df.index.str.contains('DBUG')]
+    df.drop(ix, inplace=True, axis=0)
+    self.nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
+    self.links = list(zip(df.i,df.j,df.k))
+    return df
+
+
+  def create_pyomo_model(self, debug_mode=False, debug_cost=2e7):
+
+    # work on a local copy of the dataframe
+    if not debug_mode and self.df.index.str.contains('DBUG').any():
+      df = self.remove_debug_links()
+    else:
+      df = self.df
+
+    print('Creating Pyomo Model (debug=%s)' % debug_mode)
 
     model = ConcreteModel()
 
@@ -66,10 +86,13 @@ class Network():
     model.sink = Param(initialize='SINK')
 
     def init_params(p):
-      return lambda model,i,j,k: self.df.loc[str(i)+'_'+str(j)+'_'+str(k)][p]
+      if p == 'cost' and debug_mode:
+        return lambda model,i,j,k: debug_cost if ('DBUG' in str(i)+'_'+str(j)) else 1.0
+      else:
+        return lambda model,i,j,k: df.loc[str(i)+'_'+str(j)+'_'+str(k)][p]
 
     model.u = Param(model.A, initialize=init_params('upper_bound'))
-    model.l = Param(model.A, initialize=init_params('lower_bound'))
+    model.l = Param(model.A, initialize=init_params('lower_bound'), mutable=True)
     model.a = Param(model.A, initialize=init_params('amplitude'))
     model.c = Param(model.A, initialize=init_params('cost'))
 
@@ -123,17 +146,62 @@ class Network():
     self.model = model
 
 
-  def solve_pyomo_model(self, solver='glpk', nproc=1, verbose=False):
+  def solve_pyomo_model(self, solver='glpk', nproc=1, debug_mode=False):
     from pyomo.opt import SolverFactory
     opt = SolverFactory(solver)
 
     if nproc > 1 and solver is not 'glpk':
       opt.options['threads'] = nproc
     
-    self.results = opt.solve(self.model, tee=verbose)
+    if debug_mode:
+      run_again = True
 
-    if self.results.solver.termination_condition == TerminationCondition.optimal:
-      self.model.solutions.load_from(self.results)
+      while run_again:
+        print('Solving Pyomo Model (debug=%s)' % debug_mode)
+        self.results = opt.solve(self.model)
+        print('Finished. Fixing debug flows...')
+        run_again = self.fix_debug_flows()
+
+      print('All debug flows eliminated.')
+
     else:
-      print('infeasible')
-      # do something about it? max's code
+      self.results = opt.solve(self.model)#, tee=verbose)
+
+      if self.results.solver.termination_condition == TerminationCondition.optimal:
+        print('Optimal Solution Found (debug=%s).' % debug_mode)
+        self.model.solutions.load_from(self.results)
+      else:
+        print('Problem Infeasible. Run again starting from debug mode.')
+
+
+  def fix_debug_flows(self, tol=1e-5):
+
+    df, model = self.df, self.model
+    dbix = (df.i.str.contains('DBUGSRC') | df.j.str.contains('DBUGSNK'))
+    debuglinks = df[dbix].values
+
+    run_again = False
+
+    for dbl in debuglinks:
+      s = tuple(dbl[0:3])
+
+      if model.X[s].value > tol:
+        run_again = True
+        reducelinks = df[(df.i == dbl[1]) & (df.lower_bound > 0)].values
+        vol_to_reduce = model.X[s].value*1.2
+
+        for l in reducelinks:
+          s2 = tuple(l[0:3])
+          iv = model.l[s2].value
+          if iv > 0 and vol_to_reduce > 0:
+            v = min(vol_to_reduce, iv)
+            model.l[s2].value -= v
+            vol_to_reduce -= v
+            print('%s LB reduced by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
+            df.loc['_'.join(str(x) for x in l[0:3]), 'lower_bound'] = model.l[s2].value
+            
+            if vol_to_reduce == 0:
+              break
+
+    self.df, self.model = df, model
+    return run_again
