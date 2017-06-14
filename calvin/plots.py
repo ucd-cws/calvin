@@ -45,9 +45,9 @@ def plot_clustered_stacked(dfall, labels=None, title="Water Supply Portfolio",  
     axe.add_artist(l1)
     return axe
 
-
-F = pd.read_csv('flow.csv', index_col=0, parse_dates=True)
-portfolio = pd.read_csv('portfolio.csv', index_col = 0)
+fp = '../results-2017-06-14T09-57-08Z'
+F = pd.read_csv(fp + '/flow.csv', index_col=0, parse_dates=True)
+portfolio = pd.read_csv('data/portfolio.csv', index_col = 0)
 
 new_df_urban = pd.DataFrame(index=portfolio.region.unique())
 new_df_ag = pd.DataFrame(index=portfolio.region.unique())

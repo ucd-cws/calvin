@@ -53,11 +53,7 @@ def postprocess(df, model):
 
   links = df.values
   nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
-
-  # load list of demand nodes to find shortages/costs for
-  with open('calvin/data/demand_nodes.csv', 'r') as f:
-    reader = csv.reader(f)
-    demand_nodes = [row[0] for row in reader]
+  demand_nodes = pd.read_csv('calvin/data/demand_nodes.csv', index_col = 0)
 
   for link in links:
     s = tuple(link[0:3])
@@ -91,7 +87,7 @@ def postprocess(df, model):
       dict_insert(F, key, t1, v, 'sum')
 
       # Check for urban or ag demands
-      if key in demand_nodes:
+      if key in demand_nodes.index.values:
         ub = float(link[6])
         unit_cost = float(link[3])
         if (ub - v) > 1e-6: # if there is a shortage
@@ -114,10 +110,46 @@ def postprocess(df, model):
       dict_insert(D_node, n3, t3, d3)
 
   # write the output files
+  import datetime, os
+  resultdir = 'results-' + datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ')
+  os.makedirs(resultdir)
+
   things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
                     (D_lo, 'dual_lower'), (D_node, 'dual_node'),
                     (E,'evaporation'), (SV,'shortage_volume'),
                     (SC,'shortage_cost')]
 
   for data,name in things_to_save:
-    save_dict_as_csv(data, name + '.csv')
+    save_dict_as_csv(data, resultdir + '/' + name + '.csv')
+
+  aggregate_regions(resultdir)
+
+
+def aggregate_regions(fp):
+
+  # aggregate regions and supply portfolios
+  # easier to do this with pandas by just reading the CSVs again
+  sc = pd.read_csv(fp + '/shortage_cost.csv', index_col=0, parse_dates=True)
+  sv = pd.read_csv(fp + '/shortage_volume.csv', index_col=0, parse_dates=True)
+  flow = pd.read_csv(fp + '/flow.csv', index_col=0, parse_dates=True)
+  demand_nodes = pd.read_csv('calvin/data/demand_nodes.csv', index_col = 0)
+  portfolio = pd.read_csv('calvin/data/portfolio.csv', index_col = 0)
+
+  for R in demand_nodes.region.unique():
+    for t in demand_nodes.type.unique():
+      ix = demand_nodes.index[(demand_nodes.region == R) & 
+                              (demand_nodes.type == t)]
+      sc['%s_%s' % (R,t)] = sc[ix].sum(axis=1)
+      sv['%s_%s' % (R,t)] = sv[ix].sum(axis=1)
+
+  for P in portfolio.region.unique():
+    for k in portfolio.supplytype.unique():
+      for t in portfolio.type.unique():
+        ix = portfolio.index[(portfolio.region == P) & 
+                             (portfolio.type ==t) & 
+                             (portfolio.supplytype == k)]
+        flow['%s_%s_%s' % (P,k,t)] = flow[ix].sum(axis=1)
+
+  sc.to_csv(fp + '/shortage_cost.csv')
+  sv.to_csv(fp + '/shortage_volume.csv')
+  flow.to_csv(fp + '/flow.csv')
