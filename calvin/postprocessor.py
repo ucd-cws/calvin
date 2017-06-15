@@ -2,13 +2,15 @@ import json
 import csv
 import pandas as pd
 
-def save_dict_as_csv(data, filename):
+def save_dict_as_csv(data, filename, mode='w'):
   node_keys = sorted(data.keys())
   time_keys = sorted(data[node_keys[0]].keys()) # add key=int for integer timesteps
 
-  header = ['date'] + node_keys
-  writer = csv.writer(open(filename, 'w'))
-  writer.writerow(header)
+  writer = csv.writer(open(filename, mode))
+
+  if mode == 'w':
+    header = ['date'] + node_keys
+    writer.writerow(header)
 
   for t in time_keys:
     row = [t]
@@ -44,7 +46,7 @@ def dict_insert(D, k1, k2, v, collision_rule = None):
       raise ValueError('Keys [%s][%s] already exist in dictionary' % (k1,k2))
 
 
-def postprocess(df, model):
+def postprocess(df, model, resultdir=None, annual=False):
   # start with empty dicts -- this is
   # what we want to output (in separate files):
   # flows (F), storages (S), duals (D), evap (E), shortage vol (SV) and cost (SC)
@@ -111,8 +113,12 @@ def postprocess(df, model):
 
   # write the output files
   import datetime, os
-  resultdir = 'results-' + datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ')
-  os.makedirs(resultdir)
+  if not resultdir:
+    resultdir = 'results-' + datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ')
+  if not os.path.isdir(resultdir):
+    os.makedirs(resultdir)
+
+  mode = 'a' if annual else 'w'
 
   things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
                     (D_lo, 'dual_lower'), (D_node, 'dual_node'),
@@ -120,9 +126,10 @@ def postprocess(df, model):
                     (SC,'shortage_cost')]
 
   for data,name in things_to_save:
-    save_dict_as_csv(data, resultdir + '/' + name + '.csv')
+    save_dict_as_csv(data, resultdir + '/' + name + '.csv', mode)
 
-  aggregate_regions(resultdir)
+  if not annual:
+    aggregate_regions(resultdir)
 
 
 def aggregate_regions(fp):

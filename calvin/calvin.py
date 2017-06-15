@@ -91,7 +91,7 @@ class CALVIN():
       else:
         return lambda model,i,j,k: df.loc[str(i)+'_'+str(j)+'_'+str(k)][p]
 
-    model.u = Param(model.A, initialize=init_params('upper_bound'))
+    model.u = Param(model.A, initialize=init_params('upper_bound'), mutable=True)
     model.l = Param(model.A, initialize=init_params('lower_bound'), mutable=True)
     model.a = Param(model.A, initialize=init_params('amplitude'))
     model.c = Param(model.A, initialize=init_params('cost'))
@@ -171,7 +171,7 @@ class CALVIN():
         print('Optimal Solution Found (debug=%s).' % debug_mode)
         self.model.solutions.load_from(self.results)
       else:
-        print('Problem Infeasible. Run again starting from debug mode.')
+        raise RuntimeError('Problem Infeasible. Run again starting from debug mode.')
 
 
   def fix_debug_flows(self, tol=1e-5):
@@ -187,21 +187,34 @@ class CALVIN():
 
       if model.X[s].value > tol:
         run_again = True
-        reducelinks = df[(df.i == dbl[1]) & (df.lower_bound > 0)].values
-        vol_to_reduce = model.X[s].value*1.2
+        print(s)
+        print(model.X[s].value)
 
-        for l in reducelinks:
+        if 'DBUGSNK' in dbl[1]:
+          l = df[(df.i == dbl[0])].values[0] # take first one
           s2 = tuple(l[0:3])
-          iv = model.l[s2].value
-          if iv > 0 and vol_to_reduce > 0:
-            v = min(vol_to_reduce, iv)
-            model.l[s2].value -= v
-            vol_to_reduce -= v
-            print('%s LB reduced by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
-            df.loc['_'.join(str(x) for x in l[0:3]), 'lower_bound'] = model.l[s2].value
-            
-            if vol_to_reduce == 0:
-              break
+          iv = model.u[s2].value
+          v = model.X[s].value*1.2
+          model.u[s2].value += v
+          print('%s UB raised by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
+          df.loc['_'.join(str(x) for x in l[0:3]), 'upper_bound'] = model.u[s2].value
+
+        if 'DBUGSRC' in dbl[0]:
+          reducelinks = df[(df.i == dbl[1]) & (df.lower_bound > 0)].values
+          vol_to_reduce = model.X[s].value*1.2
+
+          for l in reducelinks:
+            s2 = tuple(l[0:3])
+            iv = model.l[s2].value
+            if iv > 0 and vol_to_reduce > 0:
+              v = min(vol_to_reduce, iv)
+              model.l[s2].value -= v
+              vol_to_reduce -= v
+              print('%s LB reduced by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
+              df.loc['_'.join(str(x) for x in l[0:3]), 'lower_bound'] = model.l[s2].value
+              
+              if vol_to_reduce == 0:
+                break
 
     self.df, self.model = df, model
     return run_again
