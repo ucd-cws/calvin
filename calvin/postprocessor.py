@@ -52,13 +52,21 @@ def postprocess(df, model, resultdir=None, annual=False):
   # flows (F), storages (S), duals (D), evap (E), shortage vol (SV) and cost (SC)
   F,S,E,SV,SC = {}, {}, {}, {}, {}
   D_up,D_lo,D_node = {}, {}, {}
+  EOP_storage = {}
 
   links = df.values
   nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
   demand_nodes = pd.read_csv('calvin/data/demand_nodes.csv', index_col = 0)
 
   for link in links:
+    # get values from JSON results. If they don't exist, default is 0.0.
+    # (sometimes pyomo does not include zero values in the output)
     s = tuple(link[0:3])
+    v = model.X[s].value if s in model.X else 0.0
+    d1 = model.dual[model.limit_lower[s]] if s in model.limit_lower else 0.0
+    d2 = model.dual[model.limit_upper[s]] if s in model.limit_upper else 0.0
+
+    # now figure out what keys to save it in the dictionaries
     if '.' in link[0] and '.' in link[1]:
       n1,t1 = link[0].split('.')
       n2,t2 = link[1].split('.')
@@ -69,14 +77,9 @@ def postprocess(df, model, resultdir=None, annual=False):
       n1,t1 = link[0].split('.')
       is_storage_node = True
       amplitude = 1
+      EOP_storage[n1] = v
     else:
       continue
-
-    # get values from JSON results. If they don't exist, default is 0.0.
-    # (sometimes pyomo does not include zero values in the output)
-    v = model.X[s].value if s in model.X else 0.0
-    d1 = model.dual[model.limit_lower[s]] if s in model.limit_lower else 0.0
-    d2 = model.dual[model.limit_upper[s]] if s in model.limit_upper else 0.0
 
     # sum over piecewise components
     if is_storage_node:
@@ -113,12 +116,16 @@ def postprocess(df, model, resultdir=None, annual=False):
 
   # write the output files
   import datetime, os
+
   if not resultdir:
+    if annual:
+      raise RuntimeError('resultdir must be specified for annual run')
     resultdir = 'results-' + datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ')
   if not os.path.isdir(resultdir):
     os.makedirs(resultdir)
-
-  mode = 'a' if annual else 'w'
+    mode = 'w'
+  elif annual:
+    mode = 'a'
 
   things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
                     (D_lo, 'dual_lower'), (D_node, 'dual_node'),
@@ -130,6 +137,8 @@ def postprocess(df, model, resultdir=None, annual=False):
 
   if not annual:
     aggregate_regions(resultdir)
+  else:
+    return EOP_storage
 
 
 def aggregate_regions(fp):

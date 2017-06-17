@@ -1,6 +1,7 @@
 # PyVIN Network Flow Optimization Model
 
 ### PyVIN is still in active development and is not production-ready
+### the readme needs to be updated for this version
 
 This documentation explains the process for creating a new PyVIN run either using data from the HOBBES network or self-created data. MORE INFO ON PYVIN. To learn more on the formulation of PyVIN, [detailed information](https://github.com/msdogan/pyvin/blob/master/Documentation/pyvin_documentation.pdf) is located in the Documentation folder.
 

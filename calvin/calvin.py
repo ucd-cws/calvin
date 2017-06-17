@@ -5,7 +5,7 @@ import pandas as pd
 
 class CALVIN():
 
-  def __init__(self, linksfile):
+  def __init__(self, linksfile, ic=None):
     df = pd.read_csv(linksfile)
     df['link'] = df.i.map(str) + '_' + df.j.map(str) + '_' + df.k.map(str)
     df.set_index('link', inplace=True)
@@ -13,12 +13,37 @@ class CALVIN():
     self.links = list(zip(df.i,df.j,df.k))
 
     self.df = df
-    self.T = len(self.df)
+    # self.T = len(self.df)
+    SR_stats = pd.read_csv('calvin/data/SR_stats.csv', index_col=0).to_dict()
+    self.min_storage = SR_stats['min']
+    self.max_storage = SR_stats['max']
+
+    if ic:
+      self.apply_ic(ic)
+
     self.networkcheck()
+
+  def apply_ic(self, ic):
+    for k in ic:
+      ix = (self.df.i.str.contains('INITIAL') &
+            self.df.j.str.contains(k))
+      self.df.loc[ix, ['lower_bound','upper_bound']] = ic[k]
 
   def inflow_multiplier(self, x):
     ix = self.df.i.str.contains('INFLOW')
     self.df.loc[ix, ['lower_bound','upper_bound']] *= x
+
+  def eop_constraint_multiplier(self, x):
+    for k in self.max_storage:
+      ix = (self.df.i.str.contains(k) &
+            self.df.j.str.contains('FINAL'))
+      lb = self.min_storage[k] + (self.max_storage[k]-self.min_storage[k])*x
+      self.df.loc[ix,'lower_bound'] = lb
+      self.df.loc[ix,'upper_bound'] = self.max_storage[k]
+
+  def no_gw_overdraft(self):
+    pass
+    #impose constraints..every year?
 
   def networkcheck(self):
     nodes = self.nodes
@@ -146,7 +171,7 @@ class CALVIN():
     self.model = model
 
 
-  def solve_pyomo_model(self, solver='glpk', nproc=1, debug_mode=False):
+  def solve_pyomo_model(self, solver='glpk', nproc=1, debug_mode=False, maxiter=10):
     from pyomo.opt import SolverFactory
     opt = SolverFactory(solver)
 
@@ -155,17 +180,25 @@ class CALVIN():
     
     if debug_mode:
       run_again = True
+      i = 0
+      vol_total = 0
 
-      while run_again:
-        print('Solving Pyomo Model (debug=%s)' % debug_mode)
+      while run_again and i < maxiter:
+        print('-----Solving Pyomo Model (debug=%s)' % debug_mode)
         self.results = opt.solve(self.model)
         print('Finished. Fixing debug flows...')
-        run_again = self.fix_debug_flows()
+        run_again,vol = self.fix_debug_flows()
+        i += 1
+        vol_total += vol
 
-      print('All debug flows eliminated.')
+      if run_again:
+        raise RuntimeError('Debug mode failed: Maximum iterations reached')
+      else:
+        print('All debug flows eliminated (iter=%d, vol=%0.2f)' % (i,vol_total))
 
     else:
-      self.results = opt.solve(self.model)#, tee=verbose)
+      print('-----Solving Pyomo Model (debug=%s)' % debug_mode)
+      self.results = opt.solve(self.model, tee=False)
 
       if self.results.solver.termination_condition == TerminationCondition.optimal:
         print('Optimal Solution Found (debug=%s).' % debug_mode)
@@ -181,27 +214,40 @@ class CALVIN():
     debuglinks = df[dbix].values
 
     run_again = False
+    vol_total = 0
 
     for dbl in debuglinks:
       s = tuple(dbl[0:3])
 
       if model.X[s].value > tol:
         run_again = True
-        print(s)
-        print(model.X[s].value)
+        # print(s)
+        # print(model.X[s].value)
 
+        # if we need to get rid of extra water,
+        # raise some upper bounds (just do them all)
         if 'DBUGSNK' in dbl[1]:
-          l = df[(df.i == dbl[0])].values[0] # take first one
-          s2 = tuple(l[0:3])
-          iv = model.u[s2].value
-          v = model.X[s].value*1.2
-          model.u[s2].value += v
-          print('%s UB raised by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
-          df.loc['_'.join(str(x) for x in l[0:3]), 'upper_bound'] = model.u[s2].value
+          raiselinks = df[(df.i == dbl[0])].values
 
+          for l in raiselinks:
+            s2 = tuple(l[0:3])
+            iv = model.u[s2].value
+            v = model.X[s].value*1.2
+            model.u[s2].value += v
+            vol_total += v
+            print('%s UB raised by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
+            df.loc['_'.join(str(x) for x in l[0:3]), 'upper_bound'] = model.u[s2].value
+
+        # if we need to bring in extra water
+        # this is a much bigger problem
         if 'DBUGSRC' in dbl[0]:
-          reducelinks = df[(df.i == dbl[1]) & (df.lower_bound > 0)].values
           vol_to_reduce = model.X[s].value*1.2
+          reducelinks = df[(df.i == dbl[1]) & (df.lower_bound > 0)].values
+
+          if reducelinks.size == 0:
+            raise RuntimeError(('Not possible to reduce LB on links'
+                                'with origin %s by volume %0.2f' % 
+                                (dbl[1],vol_to_reduce)))
 
           for l in reducelinks:
             s2 = tuple(l[0:3])
@@ -210,6 +256,7 @@ class CALVIN():
               v = min(vol_to_reduce, iv)
               model.l[s2].value -= v
               vol_to_reduce -= v
+              vol_total += v
               print('%s LB reduced by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
               df.loc['_'.join(str(x) for x in l[0:3]), 'lower_bound'] = model.l[s2].value
               
@@ -217,4 +264,4 @@ class CALVIN():
                 break
 
     self.df, self.model = df, model
-    return run_again
+    return run_again,vol_total
