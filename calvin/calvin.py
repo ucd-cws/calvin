@@ -21,6 +21,7 @@ class CALVIN():
     if ic:
       self.apply_ic(ic)
 
+    self.add_ag_region_sinks()
     self.networkcheck()
 
   def apply_ic(self, ic):
@@ -80,6 +81,21 @@ class CALVIN():
         raise ValueError('ub_in < lb_out for %s (%d < %d)' % (n, ub_in[n], lb_out[n]))
       if lb_in[n] > ub_out[n]:
         raise ValueError('lb_in > ub_out for %s (%d > %d)' % (n, lb_in[n], ub_out[n]))
+
+
+  def add_ag_region_sinks(self):
+    # hack to get rid of surplus water at no cost
+    df = self.df
+    links = df[df.i.str.contains('HSU') & ~df.j.str.contains('DBUG')].copy()
+    maxub = links.upper_bound.max()
+    links.j = links.apply(lambda l: 'SINK.'+l.i.split('.')[1], axis=1)
+    links.cost = 0.0
+    links.amplitude = 1.0
+    links.lower_bound = 0.0
+    links.upper_bound = maxub
+    links['link'] = links.i.map(str) + '_' + links.j.map(str) + '_' + links.k.map(str)
+    links.set_index('link', inplace=True)
+    self.df.append(links)
 
 
   def remove_debug_links(self):
@@ -227,7 +243,7 @@ class CALVIN():
         # if we need to get rid of extra water,
         # raise some upper bounds (just do them all)
         if 'DBUGSNK' in dbl[1]:
-          raiselinks = df[(df.i == dbl[0])].values
+          raiselinks = df[(df.i == dbl[0]) & ~ df.j.str.contains('DBUGSNK')].values
 
           for l in raiselinks:
             s2 = tuple(l[0:3])
@@ -246,7 +262,7 @@ class CALVIN():
 
           if reducelinks.size == 0:
             raise RuntimeError(('Not possible to reduce LB on links'
-                                'with origin %s by volume %0.2f' % 
+                                ' with origin %s by volume %0.2f' % 
                                 (dbl[1],vol_to_reduce)))
 
           for l in reducelinks:
