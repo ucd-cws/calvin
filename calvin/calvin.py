@@ -21,7 +21,11 @@ class CALVIN():
     if ic:
       self.apply_ic(ic)
 
+    # a few network fixes to make things work
     self.add_ag_region_sinks()
+    self.fix_hydropower_lbs()
+
+    # make sure things aren't broken
     self.networkcheck()
 
   def apply_ic(self, ic):
@@ -82,7 +86,6 @@ class CALVIN():
       if lb_in[n] > ub_out[n]:
         raise ValueError('lb_in > ub_out for %s (%d > %d)' % (n, lb_in[n], ub_out[n]))
 
-
   def add_ag_region_sinks(self):
     # hack to get rid of surplus water at no cost
     df = self.df
@@ -97,6 +100,20 @@ class CALVIN():
     links.set_index('link', inplace=True)
     self.df.append(links)
 
+
+  def fix_hydropower_lbs(self):
+    # storage piecewise links > 0 should have 0.0 lower bound
+    # the k=0 pieces should always have lb = dead pool
+    def get_lb(link):
+      if link.i.split('.')[0] == link.j.split('.')[0]:
+        if link.k > 0:
+          return 0.0
+        elif link.i.split('.')[0] in self.min_storage:
+          return min(self.min_storage[link.i.split('.')[0]], link.lower_bound)
+      return link.lower_bound
+
+    ix = (self.df.i.str.contains('SR_') & self.df.j.str.contains('SR_'))
+    self.df.loc[ix, 'lower_bound'] = self.df.loc[ix].apply(get_lb, axis=1)
 
   def remove_debug_links(self):
     df = self.df

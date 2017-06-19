@@ -7,6 +7,7 @@ eop = None
 for i in range(1922,2004):
 
   print('\nNow running WY %d' % i)
+  print(eop)
 
   calvin = CALVIN('calvin/data/annual/linksWY%d.csv' % i, ic=eop)
   # calvin.inflow_multiplier(0.9)
