@@ -9,8 +9,6 @@ class CALVIN():
     df = pd.read_csv(linksfile)
     df['link'] = df.i.map(str) + '_' + df.j.map(str) + '_' + df.k.map(str)
     df.set_index('link', inplace=True)
-    self.nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
-    self.links = list(zip(df.i,df.j,df.k))
 
     self.df = df
     # self.T = len(self.df)
@@ -25,8 +23,9 @@ class CALVIN():
     self.add_ag_region_sinks()
     self.fix_hydropower_lbs()
 
-    # make sure things aren't broken
-    self.networkcheck()
+    self.nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
+    self.links = list(zip(df.i,df.j,df.k))
+    self.networkcheck() # make sure things aren't broken
 
   def apply_ic(self, ic):
     for k in ic:
@@ -89,7 +88,7 @@ class CALVIN():
   def add_ag_region_sinks(self):
     # hack to get rid of surplus water at no cost
     df = self.df
-    links = df[df.i.str.contains('HSU') & ~df.j.str.contains('DBUG')].copy()
+    links = df[df.i.str.contains('HSU') & ~df.j.str.contains('DBUG')].copy(deep=True)
     maxub = links.upper_bound.max()
     links.j = links.apply(lambda l: 'SINK.'+l.i.split('.')[1], axis=1)
     links.cost = 0.0
@@ -98,7 +97,7 @@ class CALVIN():
     links.upper_bound = maxub
     links['link'] = links.i.map(str) + '_' + links.j.map(str) + '_' + links.k.map(str)
     links.set_index('link', inplace=True)
-    self.df.append(links)
+    self.df = self.df.append(links.drop_duplicates())
 
 
   def fix_hydropower_lbs(self):
@@ -145,7 +144,9 @@ class CALVIN():
 
     def init_params(p):
       if p == 'cost' and debug_mode:
-        return lambda model,i,j,k: debug_cost if ('DBUG' in str(i)+'_'+str(j)) else 1.0
+        return (lambda model,i,j,k: debug_cost 
+                  if ('DBUG' in str(i)+'_'+str(j)) # not doing 1.0 anymore
+                  else df.loc[str(i)+'_'+str(j)+'_'+str(k)]['cost'])
       else:
         return lambda model,i,j,k: df.loc[str(i)+'_'+str(j)+'_'+str(k)][p]
 
@@ -225,7 +226,8 @@ class CALVIN():
         vol_total += vol
 
       if run_again:
-        raise RuntimeError('Debug mode failed: Maximum iterations reached')
+        print(('Warning: Debug mode maximum iterations reached.'
+               ' Will still try to solve without debug mode.'))
       else:
         print('All debug flows eliminated (iter=%d, vol=%0.2f)' % (i,vol_total))
 
@@ -254,8 +256,6 @@ class CALVIN():
 
       if model.X[s].value > tol:
         run_again = True
-        # print(s)
-        # print(model.X[s].value)
 
         # if we need to get rid of extra water,
         # raise some upper bounds (just do them all)
@@ -272,10 +272,21 @@ class CALVIN():
             df.loc['_'.join(str(x) for x in l[0:3]), 'upper_bound'] = model.u[s2].value
 
         # if we need to bring in extra water
-        # this is a much bigger problem
+        # this is a much more common problem
+        # want to avoid reducing carryover requirements. look downstream instead.
+        max_depth = 7
+
         if 'DBUGSRC' in dbl[0]:
           vol_to_reduce = model.X[s].value*1.2
-          reducelinks = df[(df.i == dbl[1]) & (df.lower_bound > 0)].values
+
+          children = [dbl[1]]
+          for i in range(max_depth):
+            children += df[df.i.isin(children)
+                           & ~ df.j.str.contains('DBUGSNK')].j.tolist()
+          children = set(children)
+          reducelinks = (df[df.i.isin(children)
+                           & (df.lower_bound > 0)]
+                         .sort_values(by='lower_bound', ascending=False).values)
 
           if reducelinks.size == 0:
             raise RuntimeError(('Not possible to reduce LB on links'
@@ -285,8 +296,13 @@ class CALVIN():
           for l in reducelinks:
             s2 = tuple(l[0:3])
             iv = model.l[s2].value
+            # d1 = model.dual[model.limit_lower[s]] if s in model.limit_lower else 0.0
+
             if iv > 0 and vol_to_reduce > 0:
               v = min(vol_to_reduce, iv)
+              # don't allow big reductions on carryover links
+              if 'SR_' in l[0] and 'SR_' in l[1]: 
+                v = min(v, 10.0)
               model.l[s2].value -= v
               vol_to_reduce -= v
               vol_total += v
