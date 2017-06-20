@@ -11,6 +11,7 @@ class CALVIN():
     df.set_index('link', inplace=True)
 
     self.df = df
+
     # self.T = len(self.df)
     SR_stats = pd.read_csv('calvin/data/SR_stats.csv', index_col=0).to_dict()
     self.min_storage = SR_stats['min']
@@ -26,6 +27,11 @@ class CALVIN():
     self.nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
     self.links = list(zip(df.i,df.j,df.k))
     self.networkcheck() # make sure things aren't broken
+    
+    # test test dont keep this
+    # self.df.loc[self.df.lower_bound != 0.0].to_csv('whatever.csv')
+    # self.df.loc[self.df.upper_bound >= 0.0, 'lower_bound'] = 0.0
+
 
   def apply_ic(self, ic):
     for k in ic:
@@ -145,8 +151,8 @@ class CALVIN():
     def init_params(p):
       if p == 'cost' and debug_mode:
         return (lambda model,i,j,k: debug_cost 
-                  if ('DBUG' in str(i)+'_'+str(j)) # not doing 1.0 anymore
-                  else df.loc[str(i)+'_'+str(j)+'_'+str(k)]['cost'])
+                  if ('DBUG' in str(i)+'_'+str(j))
+                  else 1.0)
       else:
         return lambda model,i,j,k: df.loc[str(i)+'_'+str(j)+'_'+str(k)][p]
 
@@ -242,7 +248,7 @@ class CALVIN():
         raise RuntimeError('Problem Infeasible. Run again starting from debug mode.')
 
 
-  def fix_debug_flows(self, tol=1e-5):
+  def fix_debug_flows(self, tol=1e-7):
 
     df, model = self.df, self.model
     dbix = (df.i.str.contains('DBUGSRC') | df.j.str.contains('DBUGSNK'))
@@ -274,10 +280,11 @@ class CALVIN():
         # if we need to bring in extra water
         # this is a much more common problem
         # want to avoid reducing carryover requirements. look downstream instead.
-        max_depth = 7
+        max_depth = 10
 
         if 'DBUGSRC' in dbl[0]:
           vol_to_reduce = model.X[s].value*1.2
+          print('Volume to reduce: %.2e' % vol_to_reduce)
 
           children = [dbl[1]]
           for i in range(max_depth):
@@ -296,21 +303,25 @@ class CALVIN():
           for l in reducelinks:
             s2 = tuple(l[0:3])
             iv = model.l[s2].value
-            # d1 = model.dual[model.limit_lower[s]] if s in model.limit_lower else 0.0
+            dl = model.dual[model.limit_lower[s2]] if s2 in model.limit_lower else 0.0
 
-            if iv > 0 and vol_to_reduce > 0:
+            if iv > 0 and vol_to_reduce > 0 and dl > 1e6:
               v = min(vol_to_reduce, iv)
               # don't allow big reductions on carryover links
-              if 'SR_' in l[0] and 'SR_' in l[1]: 
-                v = min(v, 10.0)
+              carryover = ['SR_', 'INITIAL', 'FINAL', 'GW_']
+              if any(c in l[0] for c in carryover) and any(c in l[1] for c in carryover): 
+                v = min(v, max(25.0, 0.1*iv))
               model.l[s2].value -= v
               vol_to_reduce -= v
               vol_total += v
-              print('%s LB reduced by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
+              print('%s LB reduced by %.2e (%0.2f%%). Dual=%.2e' % (l[0]+'_'+l[1], v, v*100/iv, dl))
               df.loc['_'.join(str(x) for x in l[0:3]), 'lower_bound'] = model.l[s2].value
               
-              if vol_to_reduce == 0:
-                break
+            if vol_to_reduce == 0:
+              break
+
+          if vol_to_reduce > 0:
+            print('Debug -> %s: could not reduce full amount (%.2e left)' % (dbl[1],vol_to_reduce))
 
     self.df, self.model = df, model
     return run_again,vol_total

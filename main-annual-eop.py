@@ -13,9 +13,9 @@ for i in range(1922,2004):
   # calvin.inflow_multiplier(0.9)
   calvin.eop_constraint_multiplier(float(sys.argv[1]))
 
-  calvin.create_pyomo_model(debug_mode=True, debug_cost=2e6)
+  calvin.create_pyomo_model(debug_mode=True, debug_cost=2e8)
   # calvin.solve_pyomo_model(solver='glpk', nproc=1, debug_mode=True, maxiter=15)
-  calvin.solve_pyomo_model(solver='cplex', nproc=32, debug_mode=True, maxiter=15)
+  calvin.solve_pyomo_model(solver='cplex', nproc=32, debug_mode=True, maxiter=20)
 
   calvin.create_pyomo_model(debug_mode=False)
   # calvin.solve_pyomo_model(solver='glpk', nproc=1, debug_mode=False)
