@@ -28,10 +28,6 @@ class CALVIN():
     self.links = list(zip(df.i,df.j,df.k))
     self.networkcheck() # make sure things aren't broken
     
-    # test test dont keep this
-    # self.df.loc[self.df.lower_bound != 0.0].to_csv('whatever.csv')
-    # self.df.loc[self.df.upper_bound >= 0.0, 'lower_bound'] = 0.0
-
 
   def apply_ic(self, ic):
     for k in ic:
@@ -95,15 +91,16 @@ class CALVIN():
     # hack to get rid of surplus water at no cost
     df = self.df
     links = df[df.i.str.contains('HSU') & ~df.j.str.contains('DBUG')].copy(deep=True)
-    maxub = links.upper_bound.max()
-    links.j = links.apply(lambda l: 'SINK.'+l.i.split('.')[1], axis=1)
-    links.cost = 0.0
-    links.amplitude = 1.0
-    links.lower_bound = 0.0
-    links.upper_bound = maxub
-    links['link'] = links.i.map(str) + '_' + links.j.map(str) + '_' + links.k.map(str)
-    links.set_index('link', inplace=True)
-    self.df = self.df.append(links.drop_duplicates())
+    if not links.empty:
+      maxub = links.upper_bound.max()
+      links.j = links.apply(lambda l: 'SINK.'+l.i.split('.')[1], axis=1)
+      links.cost = 0.0
+      links.amplitude = 1.0
+      links.lower_bound = 0.0
+      links.upper_bound = maxub
+      links['link'] = links.i.map(str) + '_' + links.j.map(str) + '_' + links.k.map(str)
+      links.set_index('link', inplace=True)
+      self.df = self.df.append(links.drop_duplicates())
 
 
   def fix_hydropower_lbs(self):
