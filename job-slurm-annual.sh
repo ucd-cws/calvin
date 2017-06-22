@@ -18,4 +18,4 @@ export PATH=$PATH:$GUROBI_HOME/bin:$CPLEX_HOME/bin/x86-64_linux:$GDIR/cbc/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GUROBI_HOME/lib:$CPLEX_HOME/lib/x86-64_linux/static_pic
 export GRB_LICENSE_FILE=$GDIR/gurobi652/gurobi.lic
 
-python main-annual-eop.py ${EOP}
+python main-annual.py ${EOP}

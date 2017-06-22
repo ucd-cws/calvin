@@ -16,6 +16,6 @@ calvin.create_pyomo_model(debug_mode=False)
 # calvin.solve_pyomo_model(solver='glpk', nproc=1, debug_mode=False)
 calvin.solve_pyomo_model(solver='gurobi', nproc=32, debug_mode=False)
 
-# optional: write to json file. better to postprocess and save as csv.
+# optional: write to json file. better to run postprocess (saves CSVs)
 # calvin.results.write(filename='thing.json', format='JSON')
 postprocess(calvin.df, calvin.model)
