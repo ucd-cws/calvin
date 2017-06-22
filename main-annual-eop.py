@@ -15,7 +15,7 @@ for i in range(1922,2004):
 
   calvin.create_pyomo_model(debug_mode=True, debug_cost=2e8)
   # calvin.solve_pyomo_model(solver='glpk', nproc=1, debug_mode=True, maxiter=15)
-  calvin.solve_pyomo_model(solver='cplex', nproc=32, debug_mode=True, maxiter=20)
+  calvin.solve_pyomo_model(solver='cplex', nproc=32, debug_mode=True, maxiter=25)
 
   calvin.create_pyomo_model(debug_mode=False)
   # calvin.solve_pyomo_model(solver='glpk', nproc=1, debug_mode=False)
@@ -26,4 +26,4 @@ for i in range(1922,2004):
                     resultdir='xresults-annual-'+sys.argv[1], annual=True) 
 
 # this is only required as a separate step when running annual loop
-aggregate_regions('xresults-annual'+sys.argv[1])
+aggregate_regions('xresults-annual-'+sys.argv[1])

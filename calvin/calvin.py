@@ -283,7 +283,7 @@ class CALVIN():
         max_depth = 10
 
         if 'DBUGSRC' in dbl[0]:
-          vol_to_reduce = model.X[s].value*1.2
+          vol_to_reduce = max(model.X[s].value*1.2, 0.5)
           print('Volume to reduce: %.2e' % vol_to_reduce)
 
           children = [dbl[1]]
