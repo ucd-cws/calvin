@@ -1,2 +1,6 @@
 *.pyc
 __pycache__/
+.DS_Store
+results*
+calvin/data/links*.csv
+calvin/data/annual/*
