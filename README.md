@@ -1,7 +1,5 @@
 ## PyVIN Network Flow Optimization Model
 
-### PyVIN is still in active development and is not production-ready
-
 Network flow optimization of California's water supply system. Requires: [NumPy](http://www.numpy.org/)/[SciPy](https://www.scipy.org/)/[Pandas](http://pandas.pydata.org/) (all available in the [Anaconda Distribution]((https://www.continuum.io/downloads)), and [Pyomo](https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html).
 
 Recommended command-line method to install Pyomo (**only tested with Python 3.4**):
