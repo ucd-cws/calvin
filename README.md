@@ -14,7 +14,7 @@ This will install the [GLPK](https://www.gnu.org/software/glpk/) solver. Pyomo c
 
 - Clone repository
 ```
-git clone https://github.com/msdogan/pyvin
+git clone https://github.com/ucd-cws/calvin
 ```
 
 - Get network data (links). CSV file with column headers:
