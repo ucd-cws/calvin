@@ -1,4 +1,4 @@
-## PyVIN Network Flow Optimization Model
+## CALVIN Network Flow Optimization Model
 
 Network flow optimization of California's water supply system. Requires: [NumPy](http://www.numpy.org/)/[SciPy](https://www.scipy.org/)/[Pandas](http://pandas.pydata.org/) (all available in the [Anaconda Distribution]((https://www.continuum.io/downloads)), and [Pyomo](https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html).
 
@@ -14,7 +14,7 @@ This will install the [GLPK](https://www.gnu.org/software/glpk/) solver. Pyomo c
 
 - Clone repository
 ```
-git clone https://github.com/msdogan/pyvin
+git clone https://github.com/ucd-cws/calvin
 ```
 
 - Get network data (links). CSV file with column headers:
