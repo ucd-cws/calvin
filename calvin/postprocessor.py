@@ -5,7 +5,6 @@ import pandas as pd
 def save_dict_as_csv(data, filename, mode='w'):
   node_keys = sorted(data.keys())
   time_keys = sorted(data[node_keys[0]].keys()) # add key=int for integer timesteps
-
   writer = csv.writer(open(filename, mode))
 
   if mode == 'w':
@@ -46,17 +45,18 @@ def dict_insert(D, k1, k2, v, collision_rule = None):
       raise ValueError('Keys [%s][%s] already exist in dictionary' % (k1,k2))
 
 
-def postprocess(df, model, resultdir=None, annual=False):
+def postprocess(df, model, begin, end, resultdir=None, annual=False, i='2000'):
   # start with empty dicts -- this is
   # what we want to output (in separate files):
   # flows (F), storages (S), duals (D), evap (E), shortage vol (SV) and cost (SC)
-  F,S,E,SV,SC = {}, {}, {}, {}, {}
+  F,S,E,SV,SC,OC = {}, {}, {}, {}, {}, {}
   D_up,D_lo,D_node = {}, {}, {}
   EOP_storage = {}
 
   links = df.values
   nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
   demand_nodes = pd.read_csv('calvin/data/demand_nodes.csv', index_col = 0)
+  operating_links = pd.read_csv('calvin/data/operating_links.csv', index_col = 0, parse_dates=True)
 
   for link in links:
     # get values from JSON results. If they don't exist, default is 0.0.
@@ -102,6 +102,10 @@ def postprocess(df, model, resultdir=None, annual=False):
           dict_insert(SV, key, t1, 0.0, 'sum')
           dict_insert(SC, key, t1, 0.0, 'sum')
 
+      if key in operating_links.index.values:
+        unit_cost = float(link[3])
+        dict_insert(OC, key, t1, unit_cost*v, 'sum')
+
     # open question: what to do about duals on pumping links? Is this handled?
     dict_insert(D_up, key, t1, d1, 'last')
     dict_insert(D_lo, key, t1, d2, 'first')
@@ -121,21 +125,28 @@ def postprocess(df, model, resultdir=None, annual=False):
     if annual:
       raise RuntimeError('resultdir must be specified for annual run')
     resultdir = 'results-' + datetime.datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ')
+  
+  mode = 'w'
+  
   if not os.path.isdir(resultdir):
     os.makedirs(resultdir)
     mode = 'w'
   elif annual:
-    mode = 'a'
+    if i == begin:
+      mode = 'w'
+    else:
+      mode = 'a'
 
   things_to_save = [(F, 'flow'), (S, 'storage'), (D_up, 'dual_upper'), 
                     (D_lo, 'dual_lower'), (D_node, 'dual_node'),
                     (E,'evaporation'), (SV,'shortage_volume'),
-                    (SC,'shortage_cost')]
+                    (SC,'shortage_cost'), (OC, 'operating_cost')]
 
   for data,name in things_to_save:
     save_dict_as_csv(data, resultdir + '/' + name + '.csv', mode)
 
-  if not annual:
+  # Implemented so results can be aggregated by region/type after last time step in LF has finished. If running a smaller subset, need to change this to last time period of your run.
+  if i == end:
     aggregate_regions(resultdir)
   else:
     return EOP_storage
@@ -147,8 +158,11 @@ def aggregate_regions(fp):
   # easier to do this with pandas by just reading the CSVs again
   sc = pd.read_csv(fp + '/shortage_cost.csv', index_col=0, parse_dates=True)
   sv = pd.read_csv(fp + '/shortage_volume.csv', index_col=0, parse_dates=True)
+  oc = pd.read_csv(fp + '/operating_cost.csv', index_col=0, parse_dates=True)
   flow = pd.read_csv(fp + '/flow.csv', index_col=0, parse_dates=True)
   demand_nodes = pd.read_csv('calvin/data/demand_nodes.csv', index_col = 0)
+  operating_links = pd.read_csv('calvin/data/operating_links.csv', index_col = 0, parse_dates=True)
+
   portfolio = pd.read_csv('calvin/data/portfolio.csv', index_col = 0)
 
   for R in demand_nodes.region.unique():
@@ -166,6 +180,12 @@ def aggregate_regions(fp):
                              (portfolio.supplytype == k)]
         flow['%s_%s_%s' % (P,k,t)] = flow[ix].sum(axis=1)
 
+  for T in operating_links.type.unique():
+    ix = operating_links.index[(operating_links.type == T)]
+    vals = operating_links.ix[ix].index.values
+    oc['%s' % T] = oc[vals].sum(axis=1)
+
   sc.to_csv(fp + '/shortage_cost.csv')
   sv.to_csv(fp + '/shortage_volume.csv')
+  oc.to_csv(fp + '/operating_cost.csv')
   flow.to_csv(fp + '/flow.csv')

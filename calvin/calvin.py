@@ -13,6 +13,8 @@ class CALVIN():
 
     self.df = df
     self.linksfile = os.path.splitext(linksfile)[0] # filename w/o extension
+    base = os.path.basename(linksfile)
+    self.linksname = os.path.splitext(base)[0] # grab filename w/o extension or path
 
     # self.T = len(self.df)
     SR_stats = pd.read_csv('calvin/data/SR_stats.csv', index_col=0).to_dict()
@@ -39,9 +41,9 @@ class CALVIN():
 
   def inflow_multiplier(self, proj):
 
-  	# This function is essential for running climate change scenarios in CALVIN.
-  	# Function pulls in a csv with mutlipliers for every CALVIN rim inflow at each month. An example is provided in the "data" folder called sample-multipliers.csv.
-  	# In this function, the same multipliers are used for each year of the model run. Further code development could include using different multipliers for every year.
+    # This function is essential for running climate change scenarios in CALVIN.
+    # Function pulls in a csv with mutlipliers for every CALVIN rim inflow at each month. An example is provided in the "data" folder called sample-multipliers.csv.
+    # In this function, the same multipliers are used for each year of the model run. Further code development could include using different multipliers for every year.
 
     # read in multipliers
     mult = pd.read_csv('calvin/data/multipliers/multipliers_%s.csv' % proj, index_col=0, header=0)
@@ -51,7 +53,7 @@ class CALVIN():
     for key in mult.index:
       for m in months:
 
-      	# boolean to find the rim inflow at the month specified
+        # boolean to find the rim inflow at the month specified
         ix = (self.df.i.str.contains('INFLOW') & self.df.i.str.contains(m) & self.df.j.str.contains(key))
         
         # apply multiplier for given rim inflow
@@ -76,7 +78,7 @@ class CALVIN():
   
   def yolobypass_ub(self):
 
-  	# This function increases the Yolo Bypass upper bound. In the original Python CALVIN model, had a low upper bound which caused infeasabilities. This fix was recommended by Mustafa Dogan.
+    # This function increases the Yolo Bypass upper bound. In the original Python CALVIN model, had a low upper bound which caused infeasabilities. This fix was recommended by Mustafa Dogan.
 
     ix = (self.df.i.str.contains('C20') & self.df.j.str.contains('D55'))
     self.df.loc[ix,'upper_bound'] = 1e9
@@ -84,8 +86,8 @@ class CALVIN():
 
   def water_availability(self, multiplier,linksfile):
 
-  	# This function multiplies all CALVIN inflows by the multiplier provided.
-  	# This was used in Max Fefer's MS thesis to adjust water availability for a sensitivity analysis. 
+    # This function multiplies all CALVIN inflows by the multiplier provided.
+    # This was used in Max Fefer's MS thesis to adjust water availability for a sensitivity analysis. 
 
     mbah = pd.read_csv(linksfile)
     ix = self.df.i.str.contains('INFLOW')
@@ -104,11 +106,11 @@ class CALVIN():
 
   def eop_constraint_multiplier(self, x):
 
-  	# This function imposes a multiplier for end of period storage at specified reservoirs in SR_stats.csv (SR_stats.csv is located in the nested folder "data").
-  	# Multiplier should only be from 0 to 1. Outside this range exceeds min/max reservoir storage.
-  	
+    # This function imposes a multiplier for end of period storage at specified reservoirs in SR_stats.csv (SR_stats.csv is located in the nested folder "data").
+    # Multiplier should only be from 0 to 1. Outside this range exceeds min/max reservoir storage.
+    
 
-  	# Optional: Save carryover storage values for easy access later using "matrix" dataframe below. 
+    # Optional: Save carryover storage values for easy access later using "matrix" dataframe below. 
     # matrix = pd.DataFrame(index=self.max_storage,columns=['carryover'])
     # print(matrix)
 
@@ -126,12 +128,12 @@ class CALVIN():
     # matrix.to_csv('GAH.csv')
 
   def eop_constraint_multiplier_bywateryeartype(self, i, scenario):
-  	
-  	# Still experimental. 
-  	# Function works, but model results have not been feasible. More work required.
-  	# Idea here is to impose a carryover storage constraint based upon CDEC water year type.
-  	# The carryover storage for each reservoir (and water year type) is the median of historically observed carryover storages from CDEC for a given reservoir water year type. 
-  	# Model results for this experiment are included in the "carryover-lf" folder.
+
+    # Still experimental. 
+    # Function works, but model results have not been feasible. More work required.
+    # Idea here is to impose a carryover storage constraint based upon CDEC water year type.
+    # The carryover storage for each reservoir (and water year type) is the median of historically observed carryover storages from CDEC for a given reservoir water year type. 
+    # Model results for this experiment are included in the "carryover-lf" folder.
 
     reservoirs = pd.read_csv('calvin/data/carryover/reservoirs_reindex_forcarryover.csv',index_col=0)
     
@@ -250,13 +252,20 @@ class CALVIN():
     return df
 
 
-  def create_pyomo_model(self, debug_mode=False, debug_cost=2e7):
-
+  def create_pyomo_model(self, debug_mode=False, debug_cost=2e7, resultdir='cold'):
     # work on a local copy of the dataframe
     if not debug_mode and self.df.index.str.contains('DBUG').any():
+
+      #create "final-links" directory if it does not exist already
+      try:
+        os.makedirs('%s' % resultdir)
+        os.makedirs('%s/final-links' % resultdir)
+      except OSError:
+        pass
+
       # previously ran in debug mode, but now done
       df = self.remove_debug_links()
-      df.to_csv(self.linksfile + '-final.csv')
+      df.to_csv('%s' % resultdir + '/final-links/' + self.linksname + '-final.csv')
 
     else:
       df = self.df
