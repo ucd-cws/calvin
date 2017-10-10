@@ -2,6 +2,7 @@ from pyomo.environ import *
 from pyomo.opt import TerminationCondition
 import numpy as np
 import pandas as pd
+import os
 
 class CALVIN():
 
@@ -11,6 +12,7 @@ class CALVIN():
     df.set_index('link', inplace=True)
 
     self.df = df
+    self.linksfile = os.path.splitext(linksfile)[0] # filename w/o extension
 
     # self.T = len(self.df)
     SR_stats = pd.read_csv('calvin/data/SR_stats.csv', index_col=0).to_dict()
@@ -35,17 +37,139 @@ class CALVIN():
             self.df.j.str.contains(k))
       self.df.loc[ix, ['lower_bound','upper_bound']] = ic[k]
 
-  def inflow_multiplier(self, x):
+  def inflow_multiplier(self, proj):
+
+  	# This function is essential for running climate change scenarios in CALVIN.
+  	# Function pulls in a csv with mutlipliers for every CALVIN rim inflow at each month. An example is provided in the "data" folder called sample-multipliers.csv.
+  	# In this function, the same multipliers are used for each year of the model run. Further code development could include using different multipliers for every year.
+
+    # read in multipliers
+    mult = pd.read_csv('calvin/data/multipliers/multipliers_%s.csv' % proj, index_col=0, header=0)
+    months = ['10-31','11-30','12-31','1-31','2-28','3-31','4-30','5-31','6-30','7-31','8-31','9-30']
+    
+    # iterate over rim inflows
+    for key in mult.index:
+      for m in months:
+
+      	# boolean to find the rim inflow at the month specified
+        ix = (self.df.i.str.contains('INFLOW') & self.df.i.str.contains(m) & self.df.j.str.contains(key))
+        
+        # apply multiplier for given rim inflow
+        self.df.loc[ix, ['lower_bound','upper_bound']] *= mult.loc[key,m]
+
+      # The minimum instream flow requirement (MIF) from Grant Lake (GNT) to Mono Lake (ML) is fixed at the GNT rim inflow.
+      # When changes are made to GNT inflow, the same multiplier needs to be applied to the GNT-ML links to avoid further infeasabilities.
+      # We've had problems in the past where solution would not converge due to small debug flows caused by Mono Lake MIF.
+
+      if 'GNT' in key:
+        ix = (self.df.i.str.contains(key) & self.df.j.str.contains('SR_ML'))
+        row_iterator = self.df.loc[ix].iterrows()
+
+        for row in row_iterator:
+          iz = (self.df.i.str.contains('INFLOW') & self.df.j.str.contains(row[1]['i']))
+          iy = (self.df.i.str.contains(row[1]['i']) & self.df.j.str.contains(row[1]['j']))
+          if self.df.loc[iy,['lower_bound']].values[0] > self.df.loc[iz,['lower_bound']].values[0]:
+            self.df.loc[iy, ['lower_bound']] = self.df.loc[iz, ['lower_bound']].values[0]
+            #print('Fixed ML lower bound')
+
+    print('Inflows adjusted for climate projection')
+  
+  def yolobypass_ub(self):
+
+  	# This function increases the Yolo Bypass upper bound. In the original Python CALVIN model, had a low upper bound which caused infeasabilities. This fix was recommended by Mustafa Dogan.
+
+    ix = (self.df.i.str.contains('C20') & self.df.j.str.contains('D55'))
+    self.df.loc[ix,'upper_bound'] = 1e9
+
+
+  def water_availability(self, multiplier,linksfile):
+
+  	# This function multiplies all CALVIN inflows by the multiplier provided.
+  	# This was used in Max Fefer's MS thesis to adjust water availability for a sensitivity analysis. 
+
+    mbah = pd.read_csv(linksfile)
     ix = self.df.i.str.contains('INFLOW')
-    self.df.loc[ix, ['lower_bound','upper_bound']] *= x
+    
+    # A modifier "mod" is needed to ensure inflows are changed correctly
+    div = mbah.loc[mbah.i.str.contains('INFLOW'), 'lower_bound'].values.sum()
+
+    #Get yearly sums instead of 82 year sum.
+    mod = div/self.df.loc[ix, 'lower_bound'].values.sum()
+
+    self.df.loc[ix, ['lower_bound','upper_bound']] *= multiplier*mod
+
+
+
+
 
   def eop_constraint_multiplier(self, x):
+
+  	# This function imposes a multiplier for end of period storage at specified reservoirs in SR_stats.csv (SR_stats.csv is located in the nested folder "data").
+  	# Multiplier should only be from 0 to 1. Outside this range exceeds min/max reservoir storage.
+  	
+
+  	# Optional: Save carryover storage values for easy access later using "matrix" dataframe below. 
+    # matrix = pd.DataFrame(index=self.max_storage,columns=['carryover'])
+    # print(matrix)
+
+
     for k in self.max_storage:
       ix = (self.df.i.str.contains(k) &
             self.df.j.str.contains('FINAL'))
       lb = self.min_storage[k] + (self.max_storage[k]-self.min_storage[k])*x
+
       self.df.loc[ix,'lower_bound'] = lb
       self.df.loc[ix,'upper_bound'] = self.max_storage[k]
+
+      # matrix['carryover'][k] = self.df.loc[ix,'upper_bound'].values[0]
+    
+    # matrix.to_csv('GAH.csv')
+
+  def eop_constraint_multiplier_bywateryeartype(self, i, scenario):
+  	
+  	# Still experimental. 
+  	# Function works, but model results have not been feasible. More work required.
+  	# Idea here is to impose a carryover storage constraint based upon CDEC water year type.
+  	# The carryover storage for each reservoir (and water year type) is the median of historically observed carryover storages from CDEC for a given reservoir water year type. 
+  	# Model results for this experiment are included in the "carryover-lf" folder.
+
+    reservoirs = pd.read_csv('calvin/data/carryover/reservoirs_reindex_forcarryover.csv',index_col=0)
+    
+    # CDEC determines water year type (WYT) for 2 river basins, Sacramento River (SR) and San Joaquin River (SJR)
+    # reservoirs in CALVIN regions 1 and 2 use SR WYT and regions 3, 4, and 5 use SJR WYT.
+
+    SR_WYT = pd.read_csv('calvin/data/carryover/WYT_SR.csv', index_col=0)
+    SJR_WYT = pd.read_csv('calvin/data/carryover/WYT_SJR.csv', index_col=0)
+
+    # read in previously calculated carryover storage values for each reservoir and WYT.
+
+    carryover = pd.read_csv('calvin/data/carryover/carryover_storage.csv',index_col=0)
+    
+    for res in reservoirs.index:
+      print(res)
+      print(scenario)
+
+      if reservoirs['loc'][res] == 'SR':
+        wyt = SR_WYT[scenario][i]
+      else:
+        wyt = SJR_WYT[scenario][i]
+
+      new_carryover = carryover[wyt][res]
+      print(new_carryover)
+
+      # Apply carryover storage at reservoir on 9-30-FINAL link
+
+      ix = (self.df.i.str.contains('SR_%s.%s-09-30' % (res,i)) & self.df.j.str.contains('FINAL'))
+      print(self.df.loc[ix,'lower_bound'])
+
+      # We placed the statements below to only allow the script to decrease carryover storage from the existing values in CALVIN.
+      # 
+      if self.df.loc[ix,'lower_bound'].values[0] > new_carryover:
+        self.df.loc[ix,['lower_bound','upper_bound']] = new_carryover
+        print(self.df.loc[ix,['lower_bound','upper_bound']])
+      else:
+        continue
+
 
   def no_gw_overdraft(self):
     pass
@@ -130,7 +254,10 @@ class CALVIN():
 
     # work on a local copy of the dataframe
     if not debug_mode and self.df.index.str.contains('DBUG').any():
+      # previously ran in debug mode, but now done
       df = self.remove_debug_links()
+      df.to_csv(self.linksfile + '-final.csv')
+
     else:
       df = self.df
 
@@ -208,7 +335,7 @@ class CALVIN():
     self.model = model
 
 
-  def solve_pyomo_model(self, solver='glpk', nproc=1, debug_mode=False, maxiter=10):
+  def solve_pyomo_model(self, solver='glpk', nproc=1, debug_mode=False, maxiter=30):
     from pyomo.opt import SolverFactory
     opt = SolverFactory(solver)
 
@@ -271,7 +398,7 @@ class CALVIN():
             v = model.X[s].value*1.2
             model.u[s2].value += v
             vol_total += v
-            print('%s UB raised by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
+            #print('%s UB raised by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
             df.loc['_'.join(str(x) for x in l[0:3]), 'upper_bound'] = model.u[s2].value
 
         # if we need to bring in extra water
@@ -281,7 +408,7 @@ class CALVIN():
 
         if 'DBUGSRC' in dbl[0]:
           vol_to_reduce = max(model.X[s].value*1.2, 0.5)
-          print('Volume to reduce: %.2e' % vol_to_reduce)
+          #print('Volume to reduce: %.2e' % vol_to_reduce)
 
           children = [dbl[1]]
           for i in range(max_depth):
@@ -311,14 +438,14 @@ class CALVIN():
               model.l[s2].value -= v
               vol_to_reduce -= v
               vol_total += v
-              print('%s LB reduced by %.2e (%0.2f%%). Dual=%.2e' % (l[0]+'_'+l[1], v, v*100/iv, dl))
+              #print('%s LB reduced by %.2e (%0.2f%%). Dual=%.2e' % (l[0]+'_'+l[1], v, v*100/iv, dl))
               df.loc['_'.join(str(x) for x in l[0:3]), 'lower_bound'] = model.l[s2].value
               
             if vol_to_reduce == 0:
               break
 
-          if vol_to_reduce > 0:
-            print('Debug -> %s: could not reduce full amount (%.2e left)' % (dbl[1],vol_to_reduce))
+          #if vol_to_reduce > 0:
+            #print('Debug -> %s: could not reduce full amount (%.2e left)' % (dbl[1],vol_to_reduce))
 
     self.df, self.model = df, model
     return run_again,vol_total
