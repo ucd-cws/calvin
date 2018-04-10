@@ -2,6 +2,7 @@ from pyomo.environ import *
 from pyomo.opt import TerminationCondition
 import numpy as np
 import pandas as pd
+import os
 
 class CALVIN():
 
@@ -11,6 +12,7 @@ class CALVIN():
     df.set_index('link', inplace=True)
 
     self.df = df
+    self.linksfile = os.path.splitext(linksfile)[0] # filename w/o extension
 
     # self.T = len(self.df)
     SR_stats = pd.read_csv('calvin/data/SR_stats.csv', index_col=0).to_dict()
@@ -130,7 +132,9 @@ class CALVIN():
 
     # work on a local copy of the dataframe
     if not debug_mode and self.df.index.str.contains('DBUG').any():
+      # previously ran in debug mode, but now done
       df = self.remove_debug_links()
+      df.to_csv(self.linksfile + '-final.csv')
     else:
       df = self.df
 
