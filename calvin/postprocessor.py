@@ -111,7 +111,7 @@ def postprocess(df, model, resultdir=None, annual=False):
   for node in nodes:
     if '.' in node:
       n3,t3 = node.split('.')
-      d3 = model.dual[model.flow[s]] if s in model.flow else 0.0
+      d3 = model.dual[model.flow[node]] if node in model.flow else 0.0
       dict_insert(D_node, n3, t3, d3)
 
   # write the output files
