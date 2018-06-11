@@ -7,6 +7,14 @@ import os
 class CALVIN():
 
   def __init__(self, linksfile, ic=None):
+    """
+    Initialize CALVIN model object.
+
+    :param linksfile: (string) CSV file containing network link information
+    :param ic: (dict) Initial storage conditions for surface reservoirs
+                only used for annual optimization
+    :returns: CALVIN model object
+    """
     df = pd.read_csv(linksfile)
     df['link'] = df.i.map(str) + '_' + df.j.map(str) + '_' + df.k.map(str)
     df.set_index('link', inplace=True)
@@ -32,16 +40,35 @@ class CALVIN():
     
 
   def apply_ic(self, ic):
+    """
+    Set initial storage conditions.
+
+    :param ic: (dict) initial storage values
+    :returns: nothing, but modifies the model object
+    """
     for k in ic:
       ix = (self.df.i.str.contains('INITIAL') &
             self.df.j.str.contains(k))
       self.df.loc[ix, ['lower_bound','upper_bound']] = ic[k]
 
   def inflow_multiplier(self, x):
+    """
+    Multiply all network inflows by a constant.
+
+    :param x: (float) value to multiply inflows
+    :returns: nothing, but modifies the model object
+    """
     ix = self.df.i.str.contains('INFLOW')
     self.df.loc[ix, ['lower_bound','upper_bound']] *= x
 
   def eop_constraint_multiplier(self, x):
+    """
+    Set end-of-period storage constraints as a fraction of maximum 
+    available storage. Needed for limited foresight (annual) optimization.
+
+    :param x: (float) fraction of maximum storage to set lower bound
+    :returns: nothing, but modifies the model object
+    """
     for k in self.max_storage:
       ix = (self.df.i.str.contains(k) &
             self.df.j.str.contains('FINAL'))
@@ -50,10 +77,19 @@ class CALVIN():
       self.df.loc[ix,'upper_bound'] = self.max_storage[k]
 
   def no_gw_overdraft(self):
+    """
+    Impose constraints to prevent groundwater overdraft
+
+    (not currently implemented)
+    """
     pass
-    #impose constraints..every year?
 
   def networkcheck(self):
+    """
+    Confirm constraint feasibility for the model object.
+    (No inputs or outputs)
+    :raises: ValueError when infeasibilities are identified.
+    """
     nodes = self.nodes
     links = self.df.values
 
@@ -90,7 +126,12 @@ class CALVIN():
         raise ValueError('lb_in > ub_out for %s (%d > %d)' % (n, lb_in[n], ub_out[n]))
 
   def add_ag_region_sinks(self):
-    # hack to get rid of surplus water at no cost
+    """
+    Hack to get rid of surplus water at no cost from agricultural regions.
+    Called internally when model is initialized.
+
+    :returns: nothing, but modifies the model object
+    """
     df = self.df
     links = df[df.i.str.contains('HSU') & ~df.j.str.contains('DBUG')].copy(deep=True)
     if not links.empty:
@@ -106,8 +147,13 @@ class CALVIN():
 
 
   def fix_hydropower_lbs(self):
-    # storage piecewise links > 0 should have 0.0 lower bound
-    # the k=0 pieces should always have lb = dead pool
+    """
+    Hack to fix lower bound constraints on piecewise hydropower links.
+    Storage piecewise links > 0 should have 0.0 lower bound, and
+    the k=0 pieces should always have lb = dead pool.
+
+    :returns: nothing, but modifies the model object
+    """
     def get_lb(link):
       if link.i.split('.')[0] == link.j.split('.')[0]:
         if link.k > 0:
@@ -120,6 +166,11 @@ class CALVIN():
     self.df.loc[ix, 'lower_bound'] = self.df.loc[ix].apply(get_lb, axis=1)
 
   def remove_debug_links(self):
+    """
+    Remove debug links from model object.
+
+    :returns: dataframe of links, excluding debug links.
+    """
     df = self.df
     ix = df.index[df.index.str.contains('DBUG')]
     df.drop(ix, inplace=True, axis=0)
@@ -129,6 +180,16 @@ class CALVIN():
 
 
   def create_pyomo_model(self, debug_mode=False, debug_cost=2e7):
+    """
+    Use link data to create Pyomo model (constraints and objective function)
+    But do not solve yet.
+    
+    :param debug_mode: (boolean) Whether to run in debug mode.
+      Use when there may be infeasibilities in the network.
+    :param debug_cost: When in debug mode, assign this cost ($/AF) to flow on debug links.
+      This should be an arbitrarily high number.
+    :returns: nothing, but creates the model object (self.model)
+    """
 
     # work on a local copy of the dataframe
     if not debug_mode and self.df.index.str.contains('DBUG').any():
@@ -213,6 +274,18 @@ class CALVIN():
 
 
   def solve_pyomo_model(self, solver='glpk', nproc=1, debug_mode=False, maxiter=10):
+    """
+    Solve Pyomo model (must be called after create_pyomo_model)
+    
+    :param solver: (string) solver name. glpk, cplex, cbc, gurobi.
+    :param nproc: (int) number of processors. 1=serial.
+    :param debug_mode: (boolean) Whether to run in debug mode.
+      Use when there may be infeasibilities in the network.
+    :param maxiter: (int) maximum iterations for debug mode.
+    :returns: nothing, but assigns results to self.model.solutions.
+    :raises: RuntimeError, if problem is found to be infeasible.
+    """
+
     from pyomo.opt import SolverFactory
     opt = SolverFactory(solver)
 
@@ -250,6 +323,15 @@ class CALVIN():
 
 
   def fix_debug_flows(self, tol=1e-7):
+    """
+    Find infeasible constraints where debug flows occur.
+    Fix them by either raising the UB, or lowering the LB.
+    
+    :param tol: (float) Tolerance to identify nonzero debug flows
+    :returns run_again: (boolean) whether debug mode needs to run again
+    :returns vol: (float) total volume of constraint changes
+      also modifies the model object.
+    """
 
     df, model = self.df, self.model
     dbix = (df.i.str.contains('DBUGSRC') | df.j.str.contains('DBUGSNK'))
