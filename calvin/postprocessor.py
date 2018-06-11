@@ -3,6 +3,16 @@ import csv
 import pandas as pd
 
 def save_dict_as_csv(data, filename, mode='w'):
+  """
+  Given nested dict `data`, write to CSV file
+  where rows are timesteps and columns are links/nodes as appropriate.
+  
+  :param data: (dict) Nested dictionary of results data
+  :param filename: (string) Output CSV filename
+  :param mode: (string) file writing mode, 'w' for write, 'a' for append
+    in particular the annual optimization uses 'a' to append results each year.
+  :returns: nothing, but writes the output CSV file.
+  """
   node_keys = sorted(data.keys())
   time_keys = sorted(data[node_keys[0]].keys()) # add key=int for integer timesteps
 
@@ -22,12 +32,21 @@ def save_dict_as_csv(data, filename, mode='w'):
     writer.writerow(row)
 
 def dict_get(D, k1, k2, default = 0.0):
+  """
+  Custom retrieval from nested dictionary.
+  Get D[k1][k2] if it exists, otherwise default.
+  """
   if k1 in D and k2 in D[k1]:
     return D[k1][k2]
   else:
     return default
 
 def dict_insert(D, k1, k2, v, collision_rule = None):
+  """
+  Custom insertion into nested dictionary.
+  Assign D[k1][k2] = v if those keys do not exist yet.
+  If the keys do exist, follow instructions for collision_rule
+  """
   if k1 not in D:
     D[k1] = {k2: v}
   elif k2 not in D[k1]:
@@ -47,6 +66,17 @@ def dict_insert(D, k1, k2, v, collision_rule = None):
 
 
 def postprocess(df, model, resultdir=None, annual=False):
+  """
+  Postprocess model results into timeseries CSV files.
+
+  :param df: (dataframe) network links data
+  :param model: (CALVIN object) model object, post-optimization
+  :param resultdir: (string) directory to place CSV file results
+  :param annual: (boolean) whether to run annual optimization or not
+  :returns EOP_storage: (dict) end-of-period storage, only when 
+    running annual optimization. Otherwise returns nothing, but writes files.
+  """
+
   # start with empty dicts -- this is
   # what we want to output (in separate files):
   # flows (F), storages (S), duals (D), evap (E), shortage vol (SV) and cost (SC)
@@ -142,6 +172,13 @@ def postprocess(df, model, resultdir=None, annual=False):
 
 
 def aggregate_regions(fp):
+  """
+  Read the results CSV files and aggregate results by region (optional).
+
+  :param fp: (string) directory where output files are written.
+  :returns: nothing, but overwrites the results files with new
+    columns added for regional aggregations.
+  """
 
   # aggregate regions and supply portfolios
   # easier to do this with pandas by just reading the CSVs again
