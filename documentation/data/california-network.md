@@ -1,4 +1,4 @@
-### Advanced readme for data export
+## Advanced data export
 
 Users interested in exporting a subset of the California network can create their own CSV files using these steps.
 
