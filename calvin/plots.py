@@ -3,9 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import matplotlib.cm as cm
-import matplotlib
-matplotlib.style.use('ggplot')
-
+import matplotlib as mpl
+mpl.style.use('ggplot')
 
 def plot_clustered_stacked(dfall, labels=None, title="Water Supply Portfolio",  H="/", **kwargs):
 
@@ -45,21 +44,27 @@ def plot_clustered_stacked(dfall, labels=None, title="Water Supply Portfolio",  
     axe.add_artist(l1)
     return axe
 
-fp = '../results-2017-06-14T09-57-08Z'
-F = pd.read_csv(fp + '/flow.csv', index_col=0, parse_dates=True)
-portfolio = pd.read_csv('data/portfolio.csv', index_col = 0)
+def plot_urban_ag_portfolio(flow,portfolio):
+    fp = '../results-2017-06-14T09-57-08Z'
+    F = pd.read_csv(fp + '/flow.csv', index_col=0, parse_dates=True)
+    portfolio = pd.read_csv('data/portfolio.csv', index_col = 0)
 
-new_df_urban = pd.DataFrame(index=portfolio.region.unique())
-new_df_ag = pd.DataFrame(index=portfolio.region.unique())
+    new_df_urban = pd.DataFrame(index=portfolio.region.unique())
+    new_df_ag = pd.DataFrame(index=portfolio.region.unique())
 
-for P in portfolio.region.unique():
-    for k in portfolio.supplytype.unique():
-        value = F.filter(regex='%s_%s_urban' % (P,k)).sum(axis=1).mean(axis=0)
-        new_df_urban.set_value(P, k, value)
-        value = F.filter(regex='%s_%s_ag' % (P,k)).sum(axis=1).mean(axis=0)
-        new_df_ag.set_value(P, k, value)
+    for P in portfolio.region.unique():
+        for k in portfolio.supplytype.unique():
+            value = F.filter(regex='%s_%s_urban' % (P,k)).sum(axis=1).mean(axis=0)
+            new_df_urban.set_value(P, k, value)
+            value = F.filter(regex='%s_%s_ag' % (P,k)).sum(axis=1).mean(axis=0)
+            new_df_ag.set_value(P, k, value)
 
 
 
-plot_clustered_stacked([new_df_urban, new_df_ag],['urban','ag'])
-plt.show()
+    plot_clustered_stacked([new_df_urban, new_df_ag],['urban','ag'])
+    plt.show()
+
+
+
+
+
