@@ -146,7 +146,13 @@ def postprocess(df, model, resultdir=None, annual=False):
 
   # write the output files
   import datetime, os
-
+  
+  # this if statement added on 7/23/2020 by MSD. 'mode' variable was referenced before assignment.
+  if annual:
+      mode = 'a'
+  else:
+      mode = 'w'
+      
   if not resultdir:
     if annual:
       raise RuntimeError('resultdir must be specified for annual run')
