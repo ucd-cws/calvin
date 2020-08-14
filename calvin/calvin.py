@@ -1,20 +1,50 @@
+import os
+import sys
+import logging
+
 from pyomo.environ import *
 from pyomo.opt import TerminationCondition
 import numpy as np
 import pandas as pd
-import os
 
 class CALVIN():
 
-  def __init__(self, linksfile, ic=None):
+  def __init__(self, linksfile, ic=None, log_name="calvin"):
     """
     Initialize CALVIN model object.
 
     :param linksfile: (string) CSV file containing network link information
     :param ic: (dict) Initial storage conditions for surface reservoirs
                 only used for annual optimization
+    :param log_name: A name for a logger - will be used to keep logs from different model runs separate in files.
+                Defaults to "calvin", which results in a log file in the current working directory named "calvin.log".
+                You can change this each time you instantiate the CALVIN class if you want to output separate logs
+                for different runs. Otherwise, all results will be appended to the log file (not overwritten). If you
+                run multiple copies of CALVIN simultaneously, make sure to change this, or you could get errors writing
+                to the log file.
+
+                Do not provide a full path to a log file here because this value is also used in a way that is *not* a
+                file path. If being able to specify a full path is important for your workflow, please raise a GitHub
+                issue. It could be supported, but there is no need at this moment.
     :returns: CALVIN model object
     """
+
+    # set up logging code
+    self.log = logging.getLogger(log_name)
+    if not self.log.hasHandlers():  # hasHandlers will only be True if someone already called CALVIN with the same log_name in the same session
+      self.log.setLevel("DEBUG")
+      screen_handler = logging.StreamHandler(sys.stdout)
+      screen_handler.setLevel(logging.INFO)
+      screen_formatter = logging.Formatter('%(levelname)s - %(message)s')
+      screen_handler.setFormatter(screen_formatter)
+      self.log.addHandler(screen_handler)
+
+      file_handler = logging.FileHandler("{}.log".format(log_name))
+      file_handler.setLevel(logging.DEBUG)
+      file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+      file_handler.setFormatter(file_formatter)
+      self.log.addHandler(file_handler)
+
     df = pd.read_csv(linksfile)
     df['link'] = df.i.map(str) + '_' + df.j.map(str) + '_' + df.k.map(str)
     df.set_index('link', inplace=True)
@@ -199,7 +229,7 @@ class CALVIN():
     else:
       df = self.df
 
-    print('Creating Pyomo Model (debug=%s)' % debug_mode)
+    self.log.info('Creating Pyomo Model (debug=%s)' % debug_mode)
 
     model = ConcreteModel()
 
@@ -298,25 +328,25 @@ class CALVIN():
       vol_total = 0
 
       while run_again and i < maxiter:
-        print('-----Solving Pyomo Model (debug=%s)' % debug_mode)
+        self.log.info('-----Solving Pyomo Model (debug=%s)' % debug_mode)
         self.results = opt.solve(self.model)
-        print('Finished. Fixing debug flows...')
+        self.log.info('Finished. Fixing debug flows...')
         run_again,vol = self.fix_debug_flows()
         i += 1
         vol_total += vol
 
       if run_again:
-        print(('Warning: Debug mode maximum iterations reached.'
+        self.log.info(('Warning: Debug mode maximum iterations reached.'
                ' Will still try to solve without debug mode.'))
       else:
-        print('All debug flows eliminated (iter=%d, vol=%0.2f)' % (i,vol_total))
+        self.log.info('All debug flows eliminated (iter=%d, vol=%0.2f)' % (i,vol_total))
 
     else:
-      print('-----Solving Pyomo Model (debug=%s)' % debug_mode)
+      self.log.info('-----Solving Pyomo Model (debug=%s)' % debug_mode)
       self.results = opt.solve(self.model, tee=False)
 
       if self.results.solver.termination_condition == TerminationCondition.optimal:
-        print('Optimal Solution Found (debug=%s).' % debug_mode)
+        self.log.info('Optimal Solution Found (debug=%s).' % debug_mode)
         self.model.solutions.load_from(self.results)
       else:
         raise RuntimeError('Problem Infeasible. Run again starting from debug mode.')
@@ -357,7 +387,7 @@ class CALVIN():
             v = model.X[s].value*1.2
             model.u[s2].value += v
             vol_total += v
-            print('%s UB raised by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
+            self.log.info('%s UB raised by %0.2f (%0.2f%%)' % (l[0]+'_'+l[1], v, v*100/iv))
             df.loc['_'.join(str(x) for x in l[0:3]), 'upper_bound'] = model.u[s2].value
 
         # if we need to bring in extra water
@@ -367,7 +397,7 @@ class CALVIN():
 
         if 'DBUGSRC' in dbl[0]:
           vol_to_reduce = max(model.X[s].value*1.2, 0.5)
-          print('Volume to reduce: %.2e' % vol_to_reduce)
+          self.log.info('Volume to reduce: %.2e' % vol_to_reduce)
 
           children = [dbl[1]]
           for i in range(max_depth):
@@ -397,14 +427,14 @@ class CALVIN():
               model.l[s2].value -= v
               vol_to_reduce -= v
               vol_total += v
-              print('%s LB reduced by %.2e (%0.2f%%). Dual=%.2e' % (l[0]+'_'+l[1], v, v*100/iv, dl))
+              self.log.info('%s LB reduced by %.2e (%0.2f%%). Dual=%.2e' % (l[0]+'_'+l[1], v, v*100/iv, dl))
               df.loc['_'.join(str(x) for x in l[0:3]), 'lower_bound'] = model.l[s2].value
               
             if vol_to_reduce == 0:
               break
 
           if vol_to_reduce > 0:
-            print('Debug -> %s: could not reduce full amount (%.2e left)' % (dbl[1],vol_to_reduce))
+            self.log.info('Debug -> %s: could not reduce full amount (%.2e left)' % (dbl[1],vol_to_reduce))
 
     self.df, self.model = df, model
-    return run_again,vol_total
+    return run_again, vol_total
