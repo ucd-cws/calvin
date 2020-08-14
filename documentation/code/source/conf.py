@@ -23,6 +23,7 @@ author = 'Jon Herman, Mustafa Dogan, Max Fefer, Nick Santos'
 # The full version, including alpha/beta/rc tags
 release = '2020.08.14'
 
+master_doc = "index"  # make it use index instead of "contents" by default
 
 # -- General configuration ---------------------------------------------------
 
