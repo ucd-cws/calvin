@@ -1,6 +1,11 @@
+import os
+import datetime
+
 import json
 import csv
 import pandas as pd
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def save_dict_as_csv(data, filename, mode='w'):
   """
@@ -14,7 +19,7 @@ def save_dict_as_csv(data, filename, mode='w'):
   :returns: nothing, but writes the output CSV file.
   """
   node_keys = sorted(data.keys())
-  time_keys = sorted(data[node_keys[0]].keys()) # add key=int for integer timesteps
+  time_keys = sorted(data[node_keys[0]].keys())  # add key=int for integer timesteps
 
   writer = csv.writer(open(filename, mode))
 
@@ -31,6 +36,7 @@ def save_dict_as_csv(data, filename, mode='w'):
         row.append(0.0)
     writer.writerow(row)
 
+
 def dict_get(D, k1, k2, default = 0.0):
   """
   Custom retrieval from nested dictionary.
@@ -40,6 +46,7 @@ def dict_get(D, k1, k2, default = 0.0):
     return D[k1][k2]
   else:
     return default
+
 
 def dict_insert(D, k1, k2, v, collision_rule = None):
   """
@@ -86,7 +93,7 @@ def postprocess(df, model, resultdir=None, annual=False):
 
   links = df.values
   nodes = pd.unique(df[['i','j']].values.ravel()).tolist()
-  demand_nodes = pd.read_csv('calvin/data/demand_nodes.csv', index_col = 0)
+  demand_nodes = pd.read_csv(os.path.join(BASE_DIR, "data", "demand_nodes.csv"), index_col=0)
 
   for link in links:
     # get values from JSON results. If they don't exist, default is 0.0.
@@ -145,8 +152,6 @@ def postprocess(df, model, resultdir=None, annual=False):
       dict_insert(D_node, n3, t3, d3)
 
   # write the output files
-  import datetime, os
-  
   # this if statement added on 7/23/2020 by MSD. 'mode' variable was referenced before assignment.
   if annual:
       mode = 'a'
@@ -191,8 +196,8 @@ def aggregate_regions(fp):
   sc = pd.read_csv(fp + '/shortage_cost.csv', index_col=0, parse_dates=True)
   sv = pd.read_csv(fp + '/shortage_volume.csv', index_col=0, parse_dates=True)
   flow = pd.read_csv(fp + '/flow.csv', index_col=0, parse_dates=True)
-  demand_nodes = pd.read_csv('calvin/data/demand_nodes.csv', index_col = 0)
-  portfolio = pd.read_csv('calvin/data/portfolio.csv', index_col = 0)
+  demand_nodes = pd.read_csv(os.path.join(BASE_DIR, "data", "demand_nodes.csv"), index_col = 0)
+  portfolio = pd.read_csv(os.path.join(BASE_DIR, "data", "portfolio.csv"), index_col = 0)
 
   for R in demand_nodes.region.unique():
     for t in demand_nodes.type.unique():
