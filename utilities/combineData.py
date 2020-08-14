@@ -2,7 +2,8 @@
 """
 Created on Mon Feb 10 10:22:25 2020
 
-@author: Water Management Lab
+@author: Mahesh L Maskey, August 14, 2020
+This routine combines the output files from CALVIN for different years merge into one.
 """
 import pandas as pd
 def read_combine(yearList, param): 
