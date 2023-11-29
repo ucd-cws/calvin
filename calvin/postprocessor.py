@@ -21,7 +21,7 @@ def save_dict_as_csv(data, filename, mode='w'):
   node_keys = sorted(data.keys())
   time_keys = sorted(data[node_keys[0]].keys())  # add key=int for integer timesteps
 
-  writer = csv.writer(open(filename, mode))
+  writer = csv.writer(open(filename, mode, newline=""))
 
   if mode == 'w':
     header = ['date'] + node_keys
