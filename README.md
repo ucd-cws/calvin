@@ -2,13 +2,22 @@
 
 Network flow optimization of California's water supply system. Requires: [NumPy](http://www.numpy.org/)/[SciPy](https://www.scipy.org/)/[Pandas](http://pandas.pydata.org/) (all available in the [Anaconda Distribution]((https://www.continuum.io/downloads)), and [Pyomo](https://software.sandia.gov/downloads/pub/pyomo/PyomoInstallGuide.html).
 
-Recommended command-line method to install Pyomo (**only tested with Python 3.4**):
+Recommended command-line method to install Pyomo:
 ```bash 
-conda install pyomo pyomo.extras glpk --channel cachemeorg
+conda install -c conda-forge pyomo
+```
+Recommended command-line method to install GLPK solver:
+```bash 
+conda install -c conda-forge glpk
 ```
 This will install the [GLPK](https://www.gnu.org/software/glpk/) solver. Pyomo can also connect to other solvers, including [CBC](https://projects.coin-or.org/Cbc) and [CPLEX](https://www-01.ibm.com/software/commerce/optimization/cplex-optimizer/), and [Gurobi](http://www.gurobi.com/). Installation of these solvers is not covered here. *UC Davis: these are installed on HPC1 in `/group/hermangrp/`*.
 
+Recommended command-line method to install Gurobi solver:
+```bash 
+conda install -c gurobi gurobi
+```
 
+Gurobi is a commercial solver but free for academic users. License activation is required for gurobi. Please see [here](https://www.gurobi.com/academia/academic-program-and-licenses/)
 
 ## Quick Start
 
@@ -76,7 +85,7 @@ Where `i,j,k` are the source node, destination node, and piecewise index for the
 
 Several of the solvers available through Pyomo support shared-memory parallelization. (Importantly GLPK is one exception that does not support parallelization). To take advantage of this, change the script above to include:
 ```python
-calvin.solve_pyomo_model(solver='cplex', nproc=32, debug_mode=True)
+calvin.solve_pyomo_model(solver='gurobi', nproc=32, debug_mode=True)
 # do the same again for the non-debug mode run
 ```
 
